@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>airceball offline</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1, h2 {
+            color: #1a3a6b;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        /* スコアボードのスタイル変更 */
+        .scoreboard {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            background-color: #1a3a6b;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .scoreboard-team { text-align: center; }
+        .team-name { font-size: 0.8em; display: block; color: #c0c0c0; }
+        .team-score { font-size: 1.8em; font-weight: bold; }
+        .scoreboard-inning { text-align: center; }
+        .scoreboard-inning span:first-child { font-size: 0.7em; color: #c0c0c0; display: block; }
+        .bso-counts {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .bso-item { display: flex; flex-direction: column; }
+        .bso-item span:first-child { font-size: 0.7em; color: #888; }
+        .bso-item span:last-child { font-size: 1.5em; font-weight: bold; color: #1a3a6b;}
+
+        .field {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            transform: rotate(-45deg);
+        }
+        .base {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: #e0e0e0;
+            border: 2px solid #aaa;
+        }
+        #home { bottom: 0; left: 0; }
+        #first { bottom: 0; right: 0; }
+        #second { top: 0; right: 0; }
+        #third { top: 0; left: 0; }
+        .runner { background-color: #ffc107 !important; }
+
+        #batter-info {
+            background-color: #e3f2fd;
+            border: 1px solid #90caf9;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 1.2em;
+        }
+
+        #result {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #d32f2f;
+            height: 50px;
+            line-height: 50px;
+            margin-bottom: 20px;
+        }
+        .controls {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #2a64b5;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        button:hover:not(:disabled) {
+            background-color: #1a3a6b;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .no-swing { background-color: #6c757d; }
+        .no-swing:hover:not(:disabled) { background-color: #5a6268; }
+
+        /* セットアップ画面のスタイル */
+        #setup-screen { padding: 20px; }
+        .team-setup { margin-bottom: 25px; border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+        .team-setup h3 { margin-top: 0; }
+        .player-setup { margin: 12px 0; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; }
+        .player-setup input, .player-setup select { padding: 8px; margin-left: 10px; border-radius: 4px; border: 1px solid #ccc; }
+        #start-game-btn { font-size: 1.2em; padding: 15px 30px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 id="main-title">airceball offline</h1>
+
+    <div id="setup-screen">
+        <h2>チームと選手の設定</h2>
+        <div class="team-setup">
+            <h3>先攻チーム</h3>
+            <div>チーム名: <input type="text" id="team1-name" value="先攻チーム"></div>
+            <div id="team1-players"></div>
+        </div>
+        <div class="team-setup">
+            <h3>後攻チーム</h3>
+            <div>チーム名: <input type="text" id="team2-name" value="後攻チーム"></div>
+            <div id="team2-players"></div>
+        </div>
+        <button id="start-game-btn">ゲーム開始</button>
+    </div>
+
+    <div id="game-screen" style="display: none;">
+        <div class="scoreboard">
+            <div class="scoreboard-team">
+                <span class="team-name" id="team1-display-name"></span>
+                <span class="team-score" id="team1-score">0</span>
+            </div>
+            <div class="scoreboard-inning">
+                <span>INNING</span>
+                <span id="inning">1回表</span>
+            </div>
+            <div class="scoreboard-team">
+                <span class="team-name" id="team2-display-name"></span>
+                <span class="team-score" id="team2-score">0</span>
+            </div>
+        </div>
+
+        <div class="bso-counts">
+            <div class="bso-item"><span>OUT</span><span id="out-count">0</span></div>
+            <div class="bso-item"><span>STRIKE</span><span id="strike-count">0</span></div>
+            <div class="bso-item"><span>BALL</span><span id="ball-count">0</span></div>
+        </div>
+
+        <div style="transform: rotate(45deg); width: 200px; height: 200px; margin: 30px auto;">
+            <div class="field">
+                <div class="base" id="home"></div>
+                <div class="base" id="first"></div>
+                <div class="base" id="second"></div>
+                <div class="base" id="third"></div>
+            </div>
+        </div>
+
+        <div id="batter-info"></div>
+        <div id="result">ゲーム開始！</div>
+
+        <div id="pitcher-controls" class="controls">
+            <h2>投球選択</h2>
+            <button class="pitch-btn" data-pitch="1">ストレート</button>
+            <button class="pitch-btn" data-pitch="2">スライダー</button>
+            <button class="pitch-btn" data-pitch="3">カーブ</button>
+            <button class="pitch-btn" data-pitch="4">フォーク</button>
+            <button class="pitch-btn" data-pitch="5">チェンジアップ</button>
+        </div>
+
+        <div id="batter-controls" class="controls" style="display:none;">
+            <h2>打撃選択</h2>
+            <button class="swing-btn" data-pitch="1">ストレートを振る</button>
+            <button class="swing-btn" data-pitch="2">スライダーを振る</button>
+            <button class="swing-btn" data-pitch="3">カーブを振る</button>
+            <button class="swing-btn" data-pitch="4">フォークを振る</button>
+            <button class="swing-btn" data-pitch="5">チェンジアップを振る</button>
+            <button id="no-swing-btn" class="no-swing">見送る</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    //----------------------------------------
+    // ゲームの状態管理
+    //----------------------------------------
+    const gameState = {
+        teams: [
+            { name: '先攻チーム', players: [], score: 0 },
+            { name: '後攻チーム', players: [], score: 0 }
+        ],
+        gameStarted: false,
+        inning: 1,
+        isTop: true,
+        outCount: 0,
+        strikeCount: 0,
+        ballCount: 0,
+        runners: [false, false, false],
+        currentAttackerIndex: 0,
+        batterRotations: [0, 0],
+        currentPitcherChoice: null,
+        chanceTarget: null,
+    };
+
+    const PITCHES = {
+        1: { name: 'ストレート', type: 'strike' },
+        2: { name: 'スライダー', type: 'ball' },
+        3: { name: 'カーブ', type: 'strike' },
+        4: { name: 'フォーク', type: 'ball' },
+        5: { name: 'チェンジアップ', type: 'strike' },
+    };
+
+    // DOM要素
+    const mainTitleEl = document.getElementById('main-title');
+    const setupScreenEl = document.getElementById('setup-screen');
+    const gameScreenEl = document.getElementById('game-screen');
+    const inningEl = document.getElementById('inning');
+    const outCountEl = document.getElementById('out-count');
+    const strikeCountEl = document.getElementById('strike-count');
+    const ballCountEl = document.getElementById('ball-count');
+    const resultEl = document.getElementById('result');
+    const firstBaseEl = document.getElementById('first');
+    const secondBaseEl = document.getElementById('second');
+    const thirdBaseEl = document.getElementById('third');
+    const batterInfoEl = document.getElementById('batter-info');
+    const pitcherControlsEl = document.getElementById('pitcher-controls');
+    const batterControlsEl = document.getElementById('batter-controls');
+
+    //----------------------------------------
+    // ヘルパー関数
+    //----------------------------------------
+    function getCurrentBatter() {
+        const teamIndex = gameState.currentAttackerIndex;
+        const batterIndex = gameState.batterRotations[teamIndex];
+        return gameState.teams[teamIndex].players[batterIndex];
+    }
+
+    function toggleControls(showPitcher) {
+        pitcherControlsEl.style.display = showPitcher ? 'block' : 'none';
+        batterControlsEl.style.display = showPitcher ? 'none' : 'block';
+    }
+
+    function setButtonsDisabled(disabled) {
+        document.querySelectorAll('.pitch-btn, .swing-btn, #no-swing-btn').forEach(btn => {
+            btn.disabled = disabled;
+        });
+    }
+
+    //----------------------------------------
+    // UI更新
+    //----------------------------------------
+    function updateDisplay() {
+        document.getElementById('team1-score').textContent = gameState.teams[0].score;
+        document.getElementById('team2-score').textContent = gameState.teams[1].score;
+        document.getElementById('team1-display-name').textContent = gameState.teams[0].name;
+        document.getElementById('team2-display-name').textContent = gameState.teams[1].name;
+
+        inningEl.textContent = `${gameState.inning}回${gameState.isTop ? '表' : '裏'}`;
+        outCountEl.textContent = gameState.outCount;
+        strikeCountEl.textContent = gameState.strikeCount;
+        ballCountEl.textContent = gameState.ballCount;
+
+        firstBaseEl.classList.toggle('runner', gameState.runners[0]);
+        secondBaseEl.classList.toggle('runner', gameState.runners[1]);
+        thirdBaseEl.classList.toggle('runner', gameState.runners[2]);
+
+        if (gameState.gameStarted) {
+            const batter = getCurrentBatter();
+            const team = gameState.teams[gameState.currentAttackerIndex];
+            const abilityName = { 'none': 'なし', 'sengugan': '選球眼', 'nebari': '粘り', 'chance': 'チャンス○' }[batter.ability];
+            const chanceTargetName = (batter.ability === 'chance') ? `(${PITCHES[batter.chanceTarget].name}狙い)` : '';
+            batterInfoEl.textContent = `打者: ${team.name} ${gameState.batterRotations[gameState.currentAttackerIndex] + 1}番 - ${batter.name} (特能: ${abilityName}${chanceTargetName})`;
+        }
+    }
+
+    function showMessage(msg, duration = 0) {
+        resultEl.textContent = msg;
+        if (duration > 0) {
+            setTimeout(() => { resultEl.textContent = ''; }, duration);
+        }
+    }
+
+    //----------------------------------------
+    // ゲームロジック
+    //----------------------------------------
+    function nextBatter() {
+        gameState.strikeCount = 0;
+        gameState.ballCount = 0;
+        const teamIndex = gameState.currentAttackerIndex;
+        gameState.batterRotations[teamIndex] = (gameState.batterRotations[teamIndex] + 1) % gameState.teams[teamIndex].players.length;
+        updateDisplay();
+    }
+    
+    function changeInning() {
+        gameState.outCount = 0;
+        gameState.strikeCount = 0;
+        gameState.ballCount = 0;
+        gameState.runners = [false, false, false];
+        
+        if (!gameState.isTop) {
+            gameState.inning++;
+        }
+        gameState.isTop = !gameState.isTop;
+        gameState.currentAttackerIndex = (gameState.currentAttackerIndex + 1) % 2;
+
+        if (gameState.inning > 9 && !gameState.isTop) {
+            endGame();
+            return;
+        }
+        
+        showMessage('攻守交代！');
+        updateDisplay();
+        setTimeout(startTurn, 2000);
+    }
+    
+    function endGame() {
+        let message = "ゲームセット！ ";
+        const score1 = gameState.teams[0].score;
+        const score2 = gameState.teams[1].score;
+        if (score1 > score2) {
+            message += `${gameState.teams[0].name}の勝利！`;
+        } else if (score2 > score1) {
+            message += `${gameState.teams[1].name}の勝利！`;
+        } else {
+            message += "引き分け！";
+        }
+        showMessage(message);
+        setButtonsDisabled(true);
+    }
+
+    function handleOut(count = 1) {
+        gameState.outCount += count;
+        if (gameState.outCount >= 3) {
+            setTimeout(changeInning, 1500);
+        } else {
+            nextBatter();
+            setTimeout(startTurn, 1500);
+        }
+        updateDisplay();
+    }
+
+    function handleStrike() {
+        gameState.strikeCount++;
+        updateDisplay();
+        if (gameState.strikeCount >= 3) {
+            showMessage(`空振り三振！`);
+            handleOut();
+        } else {
+            setTimeout(startTurn, 1500);
+        }
+    }
+    
+    function handleBall() {
+        gameState.ballCount++;
+        updateDisplay();
+        if (gameState.ballCount >= 4) {
+            showMessage(`フォアボール！`);
+            // 四球による進塁処理
+            if (gameState.runners[0] && gameState.runners[1] && gameState.runners[2]) {
+                gameState.teams[gameState.currentAttackerIndex].score++;
+                showMessage('押し出しで1点！');
+            } else if (gameState.runners[0] && gameState.runners[1]) {
+                gameState.runners[2] = true;
+            } else if (gameState.runners[0]) {
+                gameState.runners[1] = true;
+            }
+            gameState.runners[0] = true;
+            nextBatter();
+            setTimeout(startTurn, 1500);
+        } else {
+            setTimeout(startTurn, 1500);
+        }
+    }
+
+    function handleFoul() {
+        showMessage('ファール！');
+        if (gameState.strikeCount < 2) {
+            gameState.strikeCount++;
+        }
+        updateDisplay();
+        setTimeout(startTurn, 1500);
+    }
+    
+    function advanceRunners(bases) {
+        let newRunners = [false, false, false];
+        let scoredRuns = 0;
+        
+        for (let i = 2; i >= 0; i--) {
+            if (gameState.runners[i]) {
+                if (i + bases >= 3) {
+                    scoredRuns++;
+                } else {
+                    newRunners[i + bases] = true;
+                }
+            }
+        }
+        if (bases >= 4) {
+            scoredRuns++;
+        } else {
+            newRunners[bases - 1] = true;
+        }
+
+        gameState.runners = newRunners;
+        gameState.teams[gameState.currentAttackerIndex].score += scoredRuns;
+
+        if (scoredRuns > 0) {
+            showMessage(`${scoredRuns}点入りました！`, 1500);
+        }
+    }
+
+    function handleHit(bases) {
+        let hitType = '';
+        switch(bases) {
+            case 1: hitType = 'ヒット！'; break;
+            case 2: hitType = 'ツーベースヒット！'; break;
+            case 3: hitType = 'スリーベースヒット！'; break;
+            case 4: hitType = 'ホームラン！'; break;
+        }
+        showMessage(hitType);
+        
+        advanceRunners(bases);
+        nextBatter();
+        setTimeout(startTurn, 1500);
+    }
+
+    function pitchAndSwing(pitcherChoice, playerChoice) {
+        const pitcherPitch = PITCHES[pitcherChoice];
+        const batter = getCurrentBatter();
+        
+        let message = `投手は ${pitcherPitch.name} を投げた！`;
+
+        // 1. 見送りの判定
+        if (playerChoice === 'noswing') {
+            let isStrike = pitcherPitch.type === 'strike';
+            if (pitcherChoice === '3' && batter.ability === 'sengugan') {
+                isStrike = false;
+            }
+            if (isStrike) {
+                message += ' → ストライク！';
+                showMessage(message);
+                handleStrike();
+            } else {
+                message += ' → ボール！';
+                showMessage(message);
+                handleBall();
+            }
+            return;
+        }
+
+        const playerPitch = PITCHES[playerChoice];
+        message += ` 打者は ${playerPitch.name} を狙った！`;
+        showMessage(message);
+
+        setTimeout(() => {
+            // 2. ゴロの判定 (最優先)
+            const isGoro = (pitcherChoice === '5' && playerChoice === '3') || (pitcherChoice === '3' && playerChoice === '5');
+            if (isGoro) {
+                if (gameState.runners[0] && gameState.outCount < 2) {
+                    showMessage('ゲッツー！ ダブルプレー！');
+                    gameState.runners[0] = false; // 一塁走者をアウトにする
+                    handleOut(2); // 打者走者と合わせて2アウト
+                } else {
+                    showMessage('ゴロアウト！');
+                    handleOut(1);
+                }
+                return;
+            }
+
+            // 3. ヒットの判定
+            if (pitcherChoice === playerChoice) {
+                let bases = 1;
+                const isChanceSituation = gameState.runners[1] || gameState.runners[2];
+                if (batter.ability === 'chance' && isChanceSituation && playerChoice === batter.chanceTarget) {
+                    bases = 2;
+                } else {
+                    switch(playerChoice) {
+                        case '5': bases = 2; break;
+                        case '3': bases = 4; break;
+                        default: bases = 1;
+                    }
+                }
+                handleHit(bases);
+                return;
+            }
+
+            // 4. ファールの判定
+            let isFoul = false;
+            const foulGroupA = ['1', '2']; // ストレート、スライダー
+            const foulGroupB = ['3', '4']; // カーブ、フォーク
+
+            // 粘りの特能がある場合
+            if (batter.ability === 'nebari' && gameState.strikeCount === 2) {
+                const nebariGroup = ['1', '2', '3', '4'];
+                if (nebariGroup.includes(pitcherChoice) && nebariGroup.includes(playerChoice)) {
+                    isFoul = true;
+                }
+            } else {
+                // 通常のファール判定
+                if (foulGroupA.includes(pitcherChoice) && foulGroupA.includes(playerChoice)) {
+                    isFoul = true;
+                } else if (foulGroupB.includes(pitcherChoice) && foulGroupB.includes(playerChoice)) {
+                    isFoul = true;
+                }
+            }
+            
+            if (isFoul) {
+                handleFoul();
+                return;
+            }
+
+            // 5. 空振り
+            showMessage('空振り！');
+            handleStrike();
+        }, 1200);
+    }
+    
+    //----------------------------------------
+    // ゲームフロー制御
+    //----------------------------------------
+    function startTurn() {
+        const pitcherTeamIndex = (gameState.currentAttackerIndex + 1) % 2;
+        const pitcherTeamName = gameState.teams[pitcherTeamIndex].name;
+        showMessage(`${pitcherTeamName}、投球を選択してください。`);
+        setButtonsDisabled(false);
+        toggleControls(true);
+        updateDisplay();
+    }
+    
+    function selectPitch(pitch) {
+        gameState.currentPitcherChoice = pitch;
+        const batterTeamName = gameState.teams[gameState.currentAttackerIndex].name;
+        showMessage(`${batterTeamName}、打撃を選択してください。`);
+        toggleControls(false);
+    }
+    
+    function selectBatterAction(action, pitch = null) {
+        setButtonsDisabled(true);
+        const playerChoice = action === 'swing' ? pitch : 'noswing';
+        pitchAndSwing(gameState.currentPitcherChoice, playerChoice);
+    }
+
+    //----------------------------------------
+    // セットアップと初期化
+    //----------------------------------------
+    function createPlayerSetupHTML(teamIndex) {
+        let html = '';
+        const defaultNames = teamIndex === 1 ? ['1番', '2番', '3番'] : ['1番', '2番', '3番'];
+        for (let i = 0; i < 3; i++) {
+            html += `
+                <div class="player-setup">
+                    ${i+1}番: <input type="text" id="t${teamIndex}-p${i}-name" value="${defaultNames[i]}" size="8">
+                    特能: <select id="t${teamIndex}-p${i}-ability" data-team="${teamIndex}" data-player="${i}">
+                            <option value="none">なし</option>
+                            <option value="sengugan">選球眼</option>
+                            <option value="nebari">粘り</option>
+                            <option value="chance">チャンス○</option>
+                         </select>
+                    <span id="t${teamIndex}-p${i}-chance-options" style="display:none;">
+                        狙い: 
+                        <select id="t${teamIndex}-p${i}-chance-target">
+                            <option value="2">スライダー</option>
+                            <option value="4">フォーク</option>
+                        </select>
+                    </span>
+                </div>
+            `;
+        }
+        return html;
+    }
+
+    function initSetup() {
+        document.getElementById('team1-players').innerHTML = createPlayerSetupHTML(1);
+        document.getElementById('team2-players').innerHTML = createPlayerSetupHTML(2);
+
+        document.querySelectorAll('select[id$="-ability"]').forEach(select => {
+            select.addEventListener('change', (e) => {
+                const team = e.target.dataset.team;
+                const player = e.target.dataset.player;
+                const optionsEl = document.getElementById(`t${team}-p${player}-chance-options`);
+                optionsEl.style.display = e.target.value === 'chance' ? 'inline' : 'none';
+            });
+        });
+    }
+
+    function startGame() {
+        // チーム情報と選手情報をgameStateに保存
+        gameState.teams[0].name = document.getElementById('team1-name').value;
+        gameState.teams[1].name = document.getElementById('team2-name').value;
+        
+        for (let t = 1; t <= 2; t++) {
+            for (let p = 0; p < 3; p++) {
+                const name = document.getElementById(`t${t}-p${p}-name`).value;
+                const ability = document.getElementById(`t${t}-p${p}-ability`).value;
+                const chanceTarget = document.getElementById(`t${t}-p${p}-chance-target`).value;
+                
+                gameState.teams[t-1].players.push({
+                    name: name,
+                    ability: ability,
+                    chanceTarget: (ability === 'chance') ? chanceTarget : null
+                });
+            }
+        }
+        
+        gameState.gameStarted = true;
+        mainTitleEl.textContent = `${gameState.teams[0].name} vs ${gameState.teams[1].name}`;
+        setupScreenEl.style.display = 'none';
+        gameScreenEl.style.display = 'block';
+        startTurn();
+    }
+    
+    // イベントリスナー
+    document.getElementById('start-game-btn').addEventListener('click', startGame);
+    
+    document.querySelectorAll('.pitch-btn').forEach(button => {
+        button.addEventListener('click', () => selectPitch(button.dataset.pitch));
+    });
+    
+    document.querySelectorAll('.swing-btn').forEach(button => {
+        button.addEventListener('click', () => selectBatterAction('swing', button.dataset.pitch));
+    });
+
+    document.getElementById('no-swing-btn').addEventListener('click', () => selectBatterAction('noswing'));
+
+    // ゲーム初期化
+    initSetup();
+
+</script>
+</body>
+</html>
