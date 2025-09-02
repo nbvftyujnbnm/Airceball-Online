@@ -4,315 +4,151 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Airceball Online</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', 'Arial', sans-serif;
-            background-color: #f0f4f8;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .container {
-            width: 100%;
-            max-width: 800px;
-            background-color: #fff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        h1, h2 {
-            color: #1a3a6b;
-            border-bottom: 2px solid #e0e0e0;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        h2 {
-            font-size: 1.3em;
-            margin-top: 25px;
-        }
-        .scoreboard {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            align-items: center;
-            background-color: #1a3a6b;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        .scoreboard-team { text-align: center; }
-        .team-name { font-size: 0.8em; display: block; color: #c0c0c0; }
-        .team-score { font-size: 1.8em; font-weight: bold; }
-        .scoreboard-inning { text-align: center; }
-        .scoreboard-inning span:first-child { font-size: 0.7em; color: #c0c0c0; display: block; }
-        .bso-counts {
-            display: flex;
-            justify-content: space-around;
-            background-color: #f1f1f1;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .bso-item { display: flex; flex-direction: column; }
-        .bso-item span:first-child { font-size: 0.7em; color: #888; }
-        .bso-item span:last-child { font-size: 1.5em; font-weight: bold; color: #1a3a6b;}
-
-        /* ▼▼▼ 追加 ▼▼▼ */
-        .log-container {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px 15px;
-            margin-bottom: 20px;
-            background-color: #f9f9f9;
-        }
-        .log-container h2 {
-            font-size: 1em;
-            text-align: left;
-            margin: 0 0 10px 0;
-            padding: 0;
-            border: none;
-        }
-        #log-box {
-            height: 100px;
-            overflow-y: auto;
-            text-align: left;
-            font-size: 0.9em;
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 4px;
-            padding: 8px;
-        }
-        #log-box p {
-            margin: 0 0 5px 0;
-            padding-bottom: 5px;
-            border-bottom: 1px dashed #eee;
-        }
-        #log-box p:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-        /* ▲▲▲ 追加ここまで ▲▲▲ */
-
-        .field {
-            position: relative;
-            width: 200px;
-            height: 200px;
-            margin: 20px auto;
-            transform: rotate(-45deg);
-        }
-        .base {
-            position: absolute;
-            width: 30px;
-            height: 30px;
-            background-color: #e0e0e0;
-            border: 2px solid #aaa;
-        }
-        #home { bottom: 0; left: 0; }
-        #first { bottom: 0; right: 0; }
-        #second { top: 0; right: 0; }
-        #third { top: 0; left: 0; }
-        .runner { background-color: #ffc107 !important; }
-
-        #batter-info {
-            background-color: #e3f2fd;
-            border: 1px solid #90caf9;
-            padding: 10px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            font-size: 1.2em;
-        }
-        #result {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #d32f2f;
-            height: 50px;
-            line-height: 50px;
-            margin-bottom: 20px;
-        }
-        .controls {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        button {
-            background-color: #2a64b5;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            margin: 5px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s ease;
-        }
-        button:hover:not(:disabled) { background-color: #1a3a6b; }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
-        .no-swing { background-color: #6c757d; }
-        .no-swing:hover:not(:disabled) { background-color: #5a6268; }
-
-        #setup-screen { padding: 20px; }
-        .team-setup { margin-bottom: 25px; border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
-        .team-setup h3 { margin-top: 0; }
-        .player-setup { margin: 12px 0; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; }
-        .player-setup input, .player-setup select { padding: 8px; margin-left: 10px; border-radius: 4px; border: 1px solid #ccc; }
-        #start-game-btn { font-size: 1.2em; padding: 15px 30px; }
-        
-        .data-controls { margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
-        #reset-data-btn { background-color: #d32f2f; }
-        #reset-data-btn:hover { background-color: #c62828; }
-        #export-data-btn { background-color: #4caf50; }
-        #export-data-btn:hover { background-color: #43a047; }
-        #import-data-btn { background-color: #03a9f4; }
-        #import-data-btn:hover { background-color: #0288d1; }
-
-        #analytics-btn { background-color: #ff9800; margin: 20px 0; }
-        #analytics-btn:hover:not(:disabled) { background-color: #f57c00; }
-        
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.6); display: none;
-            justify-content: center; align-items: center; z-index: 1000;
-        }
-        .modal-content {
-            background-color: #fff; padding: 20px 30px; border-radius: 8px;
-            width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;
-            position: relative; text-align: left;
-        }
-        .modal-close-btn {
-            position: absolute; top: 10px; right: 15px; font-size: 28px;
-            font-weight: bold; color: #888; cursor: pointer;
-        }
-        .modal-close-btn:hover { color: #000; }
-        #modal-body h3 {
-            margin-top: 25px; margin-bottom: 10px; padding-bottom: 8px;
-            border-bottom: 2px solid #1a3a6b; color: #1a3a6b;
-        }
-        #modal-body h3:first-child { margin-top: 0; }
-        #modal-body p { color: #666; margin-left: 10px; }
-        #modal-body ul { list-style: none; padding-left: 10px; }
-        #modal-body li { margin-bottom: 6px; }
-
-        #data-log-table {
-            width: 100%; border-collapse: collapse; font-size: 0.9em;
-        }
-        #data-log-table th, #data-log-table td {
-            border: 1px solid #ddd; padding: 6px; text-align: center;
-        }
-        #data-log-table th { background-color: #f2f2f2; }
-        #data-log-table tbody tr:nth-child(even) { background-color: #f9f9f9; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-    <h1 id="main-title">Airceball Online</h1>
-
     <div id="setup-screen">
-        <h2>ゲーム設定</h2>
-        <div>
-            ゲームモード: 
-            <select id="game-mode">
-                <option value="pvp" selected>Player vs Player</option>
-                <option value="pvc_classic">Player vs Classic CPU</option>
-                <option value="pvc_rl">Player vs AI</option>
-            </select>
+        <div class="setup-container">
+            <h2 class="setup-title">ゲーム設定</h2>
+
+            <div class="setup-card">
+                <div class="setup-grid">
+                    <div class="setup-item">
+                        <label for="game-mode">ゲームモード</label>
+                        <select id="game-mode">
+                            <option value="pvp" selected>Player vs Player</option>
+                            <option value="pvc_classic">Player vs Classic CPU</option>
+                            <option value="pvc_rl">Player vs AI</option>
+                        </select>
+                    </div>
+                    <div class="setup-item">
+                        <label for="inning-select">イニング数</label>
+                        <select id="inning-select">
+                            <option value="1" selected>1イニング</option>
+                            <option value="3">3イニング</option>
+                            <option value="5">5イニング</option>
+                            <option value="9">9イニング</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="cpu-setup" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                    <label for="player-team-choice">あなたが操作するチーム</label>
+                    <select id="player-team-choice">
+                        <option value="0">先攻チーム</option>
+                        <option value="1">後攻チーム</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setup-card">
+                <div class="tab-container">
+                    <button class="tab-link" onclick="openTab(event, 'team1-setup')">先攻チーム</button>
+                    <button class="tab-link" onclick="openTab(event, 'team2-setup')">後攻チーム</button>
+                </div>
+
+                <div id="team1-setup" class="tab-content" style="display: block;">
+                    <div class="team-name-input">
+                        <label for="team1-name">チーム名</label>
+                       <input type="text" id="team1-name" value="" list="team-suggestions">
+                    </div>
+                    <div id="team1-players"></div>
+                </div>
+                <div id="team2-setup" class="tab-content">
+                    <div class="team-name-input">
+                        <label for="team2-name">チーム名</label>
+                        <input type="text" id="team2-name" value="" list="team-suggestions">
+                    </div>
+                    <div id="team2-players"></div>
+                </div>
+            </div>
+            
+            <button id="start-game-btn">ゲーム開始</button>
+
+            <div class="setup-card data-controls">
+                <h3 class="data-controls-title">データ管理</h3>
+                <div class="data-buttons-grid">
+                    <button id="show-all-data-btn">全データ表示</button>
+                    <button id="reset-data-btn">全データリセット</button>
+                    <button id="export-data-btn">エクスポート</button>
+                    <button id="import-data-btn">インポート</button>
+                    <input type="file" id="import-file-input" accept=".json,.txt" style="display: none;">
+                </div>
+            </div>
         </div>
-        <div style="margin: 15px 0;">
-            イニング数: 
-            <select id="inning-select">
-                <option value="1">1イニング</option>
-                <option value="3">3イニング</option>
-                <option value="5">5イニング</option>
-                <option value="9" selected>9イニング</option>
-            </select>
-        </div>
-        <div id="cpu-setup" style="display: none; margin-top: 15px; padding: 10px; background-color: #e3f2fd; border-radius: 8px;">
-            あなたが操作するチーム: 
-            <select id="player-team-choice">
-                <option value="0">先攻チーム</option>
-                <option value="1">後攻チーム</option>
-            </select>
-        </div>
-        <hr style="margin: 20px 0;">
-        <h2>チームと選手の設定</h2>
-        <div class="team-setup">
-            <h3>先攻チーム</h3>
-            <div>チーム名: <input type="text" id="team1-name" value="先攻チーム"></div>
-            <div id="team1-players"></div>
-        </div>
-        <div class="team-setup">
-            <h3>後攻チーム</h3>
-            <div>チーム名: <input type="text" id="team2-name" value="後攻チーム"></div>
-            <div id="team2-players"></div>
-        </div>
-        <button id="start-game-btn">ゲーム開始</button>
-        <div class="data-controls">
-            <button id="show-all-data-btn">全データ表示</button>
-            <button id="export-data-btn">データエクスポート</button>
-            <button id="import-data-btn">データインポート</button>
-            <input type="file" id="import-file-input" accept=".json,.txt" style="display: none;">
-            <button id="reset-data-btn">全データリセット</button>
-        </div>
+		<datalist id="team-suggestions"></datalist>
     </div>
 
     <div id="game-screen" style="display: none;">
-        <div class="scoreboard">
-            <div class="scoreboard-team">
-                <span class="team-name" id="team1-display-name"></span>
-                <span class="team-score" id="team1-score">0</span>
-            </div>
-            <div class="scoreboard-inning">
-                <span>INNING</span>
-                <span id="inning">1回表</span>
-            </div>
-            <div class="scoreboard-team">
-                <span class="team-name" id="team2-display-name"></span>
-                <span class="team-score" id="team2-score">0</span>
-            </div>
-        </div>
-        <div class="bso-counts">
-            <div class="bso-item"><span>OUT</span><span id="out-count">0</span></div>
-            <div class="bso-item"><span>STRIKE</span><span id="strike-count">0</span></div>
-            <div class="bso-item"><span>BALL</span><span id="ball-count">0</span></div>
-        </div>
+        <div id="game-view-container">
+            <header class="game-header">
+                <div class="scoreboard">
+                    <div class="scoreboard-team">
+                        <span class="team-score" id="team1-score">0</span>
+                        <span class="team-name" id="team1-display-name">TEAM 1</span>
+                    </div>
+                    <div class="scoreboard-inning">
+                        <span>INNING</span>
+                        <span id="inning" class="inning-text">1回表</span>
+                    </div>
+                    <div class="scoreboard-team">
+                         <span class="team-name" id="team2-display-name">TEAM 2</span>
+                        <span class="team-score" id="team2-score">0</span>
+                    </div>
+                </div>
+                <div class="bso-counts">
+                    <div class="bso-item"><span>B</span><span id="ball-count">0</span></div>
+                    <div class="bso-item"><span>S</span><span id="strike-count">0</span></div>
+                    <div class="bso-item"><span>O</span><span id="out-count">0</span></div>
+                </div>
+            </header>
+            
+            <main class="game-main">
+                <button class="log-toggle-btn" onclick="showIngameLog()">ログ</button>
+                <button class="rules-toggle-btn" onclick="showRules()">ルール</button>
+                <button class="game-exit-btn" id="exit-button">終了</button>
 
-        <div class="log-container">
-            <h2>プレイログ</h2>
-            <div id="log-box"></div>
-        </div>
-        <div style="transform: rotate(45deg); width: 200px; height: 200px; margin: 30px auto;">
-            <div class="field">
-                <div class="base" id="home"></div>
-                <div class="base" id="first"></div>
-                <div class="base" id="second"></div>
-                <div class="base" id="third"></div>
+                <div class="field-wrapper">
+                    <div class="field">
+                        <div class="base" id="home"></div>
+                        <div class="base" id="first"></div>
+                        <div class="base" id="second"></div>
+                        <div class="base" id="third"></div>
+                    </div>
+                </div>
+                <div id="result">ゲーム開始！</div>
+            </main>
+
+            <footer class="game-footer">
+                <div id="batter-info"></div>
+                <div id="pitcher-controls" class="controls">
+                    <h2>投球選択</h2>
+                    <div class="controls-grid">
+                        <button class="pitch-btn" data-pitch="1">ストレート</button>
+                        <button class="pitch-btn" data-pitch="2">スライダー</button>
+                        <button class="pitch-btn" data-pitch="3">カーブ</button>
+                        <button class="pitch-btn" data-pitch="4">フォーク</button>
+                        <button class="pitch-btn" data-pitch="5">チェンジアップ</button>
+                    </div>
+                </div>
+                <div id="batter-controls" class="controls" style="display:none;">
+                    <h2>打撃選択</h2>
+                    <div class="controls-grid">
+                        <button class="swing-btn" data-pitch="1">ストレート</button>
+                        <button class="swing-btn" data-pitch="2">スライダー</button>
+                        <button class="swing-btn" data-pitch="3">カーブ</button>
+                        <button class="swing-btn" data-pitch="4">フォーク</button>
+                        <button class="swing-btn" data-pitch="5">チェンジアップ</button>
+                        <button id="no-swing-btn" class="no-swing">見送る</button>
+                    </div>
+                </div>
+                <button id="analytics-btn">傾向分析</button> 
+            </footer>
+
+            <div class="log-container">
+                <div id="log-box"></div>
             </div>
-        </div>
-        <div id="batter-info"></div>
-        <div id="result">ゲーム開始！</div>
-        <button id="analytics-btn">傾向分析</button>
-        <div id="pitcher-controls" class="controls">
-            <h2>投球選択</h2>
-            <button class="pitch-btn" data-pitch="1">ストレート</button>
-            <button class="pitch-btn" data-pitch="2">スライダー</button>
-            <button class="pitch-btn" data-pitch="3">カーブ</button>
-            <button class="pitch-btn" data-pitch="4">フォーク</button>
-            <button class="pitch-btn" data-pitch="5">チェンジアップ</button>
-        </div>
-        <div id="batter-controls" class="controls" style="display:none;">
-            <h2>打撃選択</h2>
-            <button class="swing-btn" data-pitch="1">ストレートを振る</button>
-            <button class="swing-btn" data-pitch="2">スライダーを振る</button>
-            <button class="swing-btn" data-pitch="3">カーブを振る</button>
-            <button class="swing-btn" data-pitch="4">フォークを振る</button>
-            <button class="swing-btn" data-pitch="5">チェンジアップを振る</button>
-            <button id="no-swing-btn" class="no-swing">見送る</button>
         </div>
     </div>
 </div>
@@ -333,740 +169,121 @@
     </div>
 </div>
 
-<script>
-    //----------------------------------------
-    // ゲームの状態管理
-    //----------------------------------------
-    const gameState = {
-        teams: [
-            { name: '先攻チーム', players: [], score: 0 },
-            { name: '後攻チーム', players: [], score: 0 }
-        ],
-        gameStarted: false, inning: 1, isTop: true, outCount: 0,
-        strikeCount: 0, ballCount: 0, pitchCountInPA: 0, 
-        runners: [false, false, false], currentAttackerIndex: 0,
-        batterRotations: [0, 0], currentPitcherChoice: null, chanceTarget: null,
-        totalInnings: 9, 
-        gameMode: 'pvp',
-        cpuTeamIndex: null,
-    };
+<div id="ingame-log-modal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="modal-close-btn">&times;</span>
+        <h2>プレイログ</h2>
+        <div id="ingame-log-body" style="max-height: 70vh; overflow-y: auto;"></div>
+    </div>
+</div>
+<div id="rules-modal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="modal-close-btn">&times;</span>
+        <h2>ルール</h2>
+        <div style="max-height: 70vh; overflow-y: auto;">
+<div class="rule-container">
 
-    //----------------------------------------
-    // データ記録＆分析用の定数と変数
-    //----------------------------------------
-    let gameLog = [];
-    const LOG_STORAGE_KEY = 'airceballLog';
+  <details class="rule-item">
+    <summary>打撃の基本ルール（塁打）</summary>
+    <div class="rule-content">
+      <p>ピッチャーが投げた球を打つと、球種に応じて以下の結果になります。</p>
+      <table>
+        <thead>
+          <tr>
+            <th>打った球種</th>
+            <th>結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ストレート、スライダー、フォーク</td>
+            <td><strong>一塁打</strong></td>
+          </tr>
+          <tr>
+            <td>チェンジアップ</td>
+            <td><strong>二塁打</strong></td>
+          </tr>
+          <tr>
+            <td>カーブ</td>
+            <td><strong>本塁打</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="notice">※特殊能力「チャンス○」が発動している場合、ルールが変わることがあります。</p>
+    </div>
+  </details>
 
-    const PITCHES = {
-        1: { name: 'ストレート', type: 'strike' }, 2: { name: 'スライダー', type: 'ball' },
-        3: { name: 'カーブ', type: 'strike' }, 4: { name: 'フォーク', type: 'ball' },
-        5: { name: 'チェンジアップ', type: 'strike' },
-    };
-    const ABILITIES = { none: 0, sengugan: 1, nebari: 2, chance: 3 };
-    const RESULTS = {
-        strike: 1, foul: 2, ball: 3, goro_out: 4, double_play: 5,
-        hit_1: 6, hit_2: 7, hit_3: 8, hit_4: 9
-    };
-    const PITCH_NAMES = { ...Object.fromEntries(Object.entries(PITCHES).map(([id, {name}]) => [id, name])), 0: '見送り' };
-    const ABILITY_NAMES = { 0: 'なし', 1: '選球眼', 2: '粘り', 3: 'チャンス○'};
-    const RESULT_NAMES = {
-        1: 'ストライク', 2: 'ファール', 3: 'ボール', 4: 'ゴロアウト', 5: 'ゲッツー',
-        6: '単打', 7: '二塁打', 8: '三塁打', 9: '本塁打'
-    };
+  <details class="rule-item">
+    <summary>特殊な結果（ファールとゴロ）</summary>
+    <div class="rule-content">
+      <h4>ファール（打ち直し）</h4>
+      <p>特定の球種の組み合わせで打った場合、「ファール」となり打ち直しになります。</p>
+      <table>
+        <thead>
+          <tr>
+            <th>投球</th>
+            <th>打席で選択した球種</th>
+            <th>結果</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ストレート</td>
+            <td>スライダー</td>
+            <td rowspan="2">ファール</td>
+          </tr>
+          <tr>
+            <td>カーブ</td>
+            <td>フォーク</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="notice">※特殊能力「粘り」が発動している場合、ルールが変わることがあります。</p>
+      <hr>
+      <h4>ゴロ（アウト）</h4>
+      <p>特定の組み合わせで打つと「ゴロ」となり、アウトになります。</p>
+      <ul>
+        <li><strong>状況</strong>: 「チェンジアップを投げてカーブを打つ」または「カーブを投げてチェンジアップを打つ」</li>
+        <li><strong>結果</strong>:
+          <ul>
+            <li>ランナーなし → <strong>1アウト</strong></li>
+            <li>一塁にランナーあり → <strong>ダブルプレー（2アウト）</strong></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </details>
 
-    // DOM要素
-    const mainTitleEl = document.getElementById('main-title');
-    const setupScreenEl = document.getElementById('setup-screen');
-    const gameScreenEl = document.getElementById('game-screen');
-    const analyticsModal = document.getElementById('analytics-modal');
-    const dataLogModal = document.getElementById('data-log-modal');
-    const inningEl = document.getElementById('inning');
-    const outCountEl = document.getElementById('out-count');
-    const strikeCountEl = document.getElementById('strike-count');
-    const ballCountEl = document.getElementById('ball-count');
-    const resultEl = document.getElementById('result');
-    const firstBaseEl = document.getElementById('first');
-    const secondBaseEl = document.getElementById('second');
-    const thirdBaseEl = document.getElementById('third');
-    const batterInfoEl = document.getElementById('batter-info');
-    const pitcherControlsEl = document.getElementById('pitcher-controls');
-    const batterControlsEl = document.getElementById('batter-controls');
-    const analyticsBtn = document.getElementById('analytics-btn');
-    const modalBody = document.getElementById('modal-body');
-    const modalTitle = document.getElementById('modal-title');
-    const dataLogBody = document.getElementById('data-log-body');
-    const gameModeSelect = document.getElementById('game-mode');
-    const cpuSetupEl = document.getElementById('cpu-setup');
-    const playerTeamChoiceSelect = document.getElementById('player-team-choice');
-    const logBoxEl = document.getElementById('log-box'); // ▼▼▼ 追加 ▼▼▼
+  <details class="rule-item">
+    <summary>特殊能力（特能）について</summary>
+    <div class="rule-content">
+      <p>選手が持つ特殊能力によって、基本ルールが有利に変わります。</p>
+      
+      <h5><strong>選球眼</strong></h5>
+      <p>ピッチャーが投げた「カーブ」がボール球扱いになり、見送ることができます。</p>
+      
+      <h5><strong>粘り</strong></h5>
+      <p>カウントが2ストライクに追い込まれると発動します。ストレート、スライダー、カーブ、フォークのどの組み合わせで打っても「ファール」にでき、三振しにくくなります。</p>
+      
+      <h5><strong>チャンス○</strong></h5>
+      <p>ランナーが得点圏（二塁または三塁）にいるチャンスの場面で発動します。事前に「スライダー」か「フォーク」のどちらかを指定し、その球を打つと結果が<strong>二塁打</strong>にグレードアップします。</p>
+    </div>
+  </details>
 
-    //----------------------------------------
-    // データ記録・読み込み関数
-    //----------------------------------------
-    function saveLog() {
-        try {
-            localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(gameLog));
-        } catch (e) { console.error("LocalStorageへの保存に失敗:", e); }
-    }
-    function loadLog() {
-        const savedData = localStorage.getItem(LOG_STORAGE_KEY);
-        if (savedData) {
-            gameLog = JSON.parse(savedData);
-            console.log(`LocalStorageから${gameLog.length}件のデータを読込`);
-        }
-    }
-    function recordEvent(pitcherChoice, playerChoice, result) {
-        const pitcherTeam = gameState.teams[(gameState.currentAttackerIndex + 1) % 2];
-        const pitcherIndex = (gameState.currentAttackerIndex + 1) % 2;
-        const batterTeam = gameState.teams[gameState.currentAttackerIndex];
-        const batterIndex = gameState.currentAttackerIndex;
-        const batter = getCurrentBatter();
+</div>
 
-        const pitcherIsComputer = gameState.gameMode.startsWith('pvc') && pitcherIndex === gameState.cpuTeamIndex;
-        const batterIsComputer = gameState.gameMode.startsWith('pvc') && batterIndex === gameState.cpuTeamIndex;
-        const computerName = gameState.gameMode === 'pvc_rl' ? 'AI' : 'CPU';
+</div>
+    </div>
+</div>
+<script src="script.js"></script>
 
-        const pitcherLogName = pitcherIsComputer ? computerName : pitcherTeam.name;
-        const batterLogName = batterIsComputer ? computerName : batterTeam.name;
-
-        const log = {
-            pitcherTeamName: pitcherLogName,
-            batterTeamName: batterLogName,
-            pitcherScore: pitcherTeam.score,
-            batterScore: batterTeam.score,
-            batterAbilityId: ABILITIES[batter.ability],
-            chanceTargetId: (batter.ability === 'chance') ? batter.chanceTarget : 0,
-            pitchCountInPA: gameState.pitchCountInPA,
-            outCount: gameState.outCount,
-            strikeCount: gameState.strikeCount,
-            ballCount: gameState.ballCount,
-            runners: gameState.runners.map(r => r ? 1 : 0).join(','),
-            pitchId: pitcherChoice,
-            swingId: playerChoice === 'noswing' ? 0 : playerChoice,
-            resultId: RESULTS[result]
-        };
-        gameLog.push(log);
-        saveLog();
-    }
-    //----------------------------------------
-    // ヘルパー・UI更新関数
-    //----------------------------------------
-    function getCurrentBatter() {
-        const teamIndex = gameState.currentAttackerIndex;
-        return gameState.teams[teamIndex].players[gameState.batterRotations[teamIndex]];
-    }
-    function toggleControls(showPitcher) {
-        pitcherControlsEl.style.display = showPitcher ? 'block' : 'none';
-        batterControlsEl.style.display = showPitcher ? 'none' : 'block';
-    }
-    function setButtonsDisabled(disabled) {
-        document.querySelectorAll('#game-screen button').forEach(btn => { btn.disabled = disabled; });
-    }
-    function updateDisplay() {
-        document.getElementById('team1-score').textContent = gameState.teams[0].score;
-        document.getElementById('team2-score').textContent = gameState.teams[1].score;
-        document.getElementById('team1-display-name').textContent = gameState.teams[0].name;
-        document.getElementById('team2-display-name').textContent = gameState.teams[1].name;
-        inningEl.textContent = `${gameState.inning}回${gameState.isTop ? '表' : '裏'}`;
-        outCountEl.textContent = gameState.outCount;
-        strikeCountEl.textContent = gameState.strikeCount;
-        ballCountEl.textContent = gameState.ballCount;
-        firstBaseEl.classList.toggle('runner', gameState.runners[0]);
-        secondBaseEl.classList.toggle('runner', gameState.runners[1]);
-        thirdBaseEl.classList.toggle('runner', gameState.runners[2]);
-        if (gameState.gameStarted) {
-            const batter = getCurrentBatter();
-            const team = gameState.teams[gameState.currentAttackerIndex];
-            const abilityName = ABILITY_NAMES[ABILITIES[batter.ability]];
-            const chanceTargetName = (batter.ability === 'chance') ? `(${PITCHES[batter.chanceTarget].name}狙い)` : '';
-            batterInfoEl.textContent = `打者: ${team.name} ${gameState.batterRotations[gameState.currentAttackerIndex] + 1}番 - ${batter.name} (特能: ${abilityName}${chanceTargetName})`;
-        }
-    }
-    // ▼▼▼ 変更 ▼▼▼
-    // 操作指示用のメッセージを中央に表示
-    function showMessage(msg) {
-        resultEl.textContent = msg;
-    }
-    // プレイ結果をログボックスに表示
-    function logMessage(msg) {
-        const p = document.createElement('p');
-        p.textContent = msg;
-        logBoxEl.appendChild(p);
-        logBoxEl.scrollTop = logBoxEl.scrollHeight; // 自動で一番下にスクロール
-    }
-    // ▲▲▲ 変更ここまで ▲▲▲
-
-    //----------------------------------------
-    // ゲームロジック
-    //----------------------------------------
-    function nextBatter() {
-        gameState.strikeCount = 0; gameState.ballCount = 0; gameState.pitchCountInPA = 0;
-        const teamIndex = gameState.currentAttackerIndex;
-        gameState.batterRotations[teamIndex] = (gameState.batterRotations[teamIndex] + 1) % gameState.teams[teamIndex].players.length;
-        updateDisplay();
-    }
-    function changeInning() {
-        if (gameState.isTop && gameState.inning >= gameState.totalInnings && gameState.teams[1].score > gameState.teams[0].score) {
-            setTimeout(endGame, 1500);
-            return;
-        }
-        if (!gameState.isTop && gameState.inning >= gameState.totalInnings && gameState.teams[0].score !== gameState.teams[1].score) {
-            setTimeout(endGame, 1500);
-            return;
-        }
-        gameState.outCount = 0; gameState.strikeCount = 0; gameState.ballCount = 0;
-        gameState.pitchCountInPA = 0; gameState.runners = [false, false, false];
-        if (!gameState.isTop) gameState.inning++;
-        gameState.isTop = !gameState.isTop;
-        gameState.currentAttackerIndex = (gameState.currentAttackerIndex + 1) % 2;
-        logMessage('*** 攻守交代！ ***'); // 変更
-        updateDisplay();
-        setTimeout(startTurn, 2000);
-    }
-
-    function endGame() {
-        let message = "ゲームセット！ ";
-        const score1 = gameState.teams[0].score;
-        const score2 = gameState.teams[1].score;
-        if (score1 > score2) message += `${gameState.teams[0].name}の勝利！`;
-        else if (score2 > score1) message += `${gameState.teams[1].name}の勝利！`;
-        else message += "引き分け！";
-        showMessage(message); // ゲーム終了は中央に表示
-        logMessage(`*** ${message} ***`); // ログにも記録
-        setButtonsDisabled(true);
-        analyticsBtn.disabled = false;
-    }
-    function handleOut(count = 1) {
-        gameState.outCount += count;
-        if (gameState.outCount >= 3) {
-            setTimeout(changeInning, 1500);
-        } else {
-            nextBatter();
-            setTimeout(startTurn, 1500);
-        }
-        updateDisplay();
-    }
-    function handleStrike() {
-        gameState.strikeCount++;
-        updateDisplay();
-        if (gameState.strikeCount >= 3) {
-            logMessage(gameState.currentPitcherChoice === 'noswing' ? '見逃し三振！' : '空振り三振！'); // 変更
-            handleOut();
-        } else {
-            setTimeout(startTurn, 1500);
-        }
-    }
-    function handleBall() {
-        gameState.ballCount++;
-        updateDisplay();
-        if (gameState.ballCount >= 4) {
-            logMessage(`フォアボール！`); // 変更
-            if (gameState.runners[0] && gameState.runners[1] && gameState.runners[2]) {
-                const oldHomeScore = gameState.teams[1].score;
-                gameState.teams[gameState.currentAttackerIndex].score++;
-                const newHomeScore = gameState.teams[1].score;
-                logMessage('押し出しで1点！'); // 変更
-                if (!gameState.isTop && gameState.inning >= gameState.totalInnings && oldHomeScore <= gameState.teams[0].score && newHomeScore > gameState.teams[0].score) {
-                    updateDisplay();
-                    logMessage('サヨナラ押し出し！'); // 変更
-                    setTimeout(endGame, 1500);
-                    return;
-                }
-            } else if (gameState.runners[0] && gameState.runners[1]) {
-                gameState.runners[2] = true;
-            } else if (gameState.runners[0]) {
-                gameState.runners[1] = true;
-            }
-            gameState.runners[0] = true;
-            nextBatter();
-            setTimeout(startTurn, 1500);
-        } else {
-            setTimeout(startTurn, 1500);
-        }
-    }
-    function handleFoul() {
-        logMessage('ファール！'); // 変更
-        if (gameState.strikeCount < 2) gameState.strikeCount++;
-        updateDisplay();
-        setTimeout(startTurn, 1500);
-    }
-    function advanceRunners(bases) {
-        let newRunners = [false, false, false];
-        let scoredRuns = 0;
-        for (let i = 2; i >= 0; i--) {
-            if (gameState.runners[i]) {
-                if (i + bases >= 3) scoredRuns++;
-                else newRunners[i + bases] = true;
-            }
-        }
-        if (bases >= 4) scoredRuns++;
-        else newRunners[bases - 1] = true;
-        gameState.runners = newRunners;
-        if(scoredRuns > 0) {
-            gameState.teams[gameState.currentAttackerIndex].score += scoredRuns;
-            logMessage(`${scoredRuns}点入りました！`); // 変更
-        }
-    }
-    function handleHit(bases) {
-        const hitTypes = { 1: 'ヒット！', 2: 'ツーベース！', 3: 'スリーベース！', 4: 'ホームラン！' };
-        const oldHomeScore = gameState.teams[1].score;
-        logMessage(hitTypes[bases]); // 変更
-        advanceRunners(bases);
-        const newHomeScore = gameState.teams[1].score;
-        if (!gameState.isTop && gameState.inning >= gameState.totalInnings && oldHomeScore <= gameState.teams[0].score && newHomeScore > gameState.teams[0].score) {
-            updateDisplay();
-            logMessage(bases === 4 ? 'サヨナラホームラン！' : 'サヨナラヒット！'); // 変更
-            setTimeout(endGame, 1500);
-            return;
-        }
-        nextBatter();
-        setTimeout(startTurn, 1500);
-    }
-    function pitchAndSwing(pitcherChoice, playerChoice) {
-        gameState.pitchCountInPA++;
-        setButtonsDisabled(true);
-        const pitcherPitch = PITCHES[pitcherChoice];
-        const batter = getCurrentBatter();
-        let message = `投手: ${pitcherPitch.name} |`; // 変更
-        if (playerChoice !== 'noswing') message += ` 打者: ${PITCHES[playerChoice].name}狙い`; // 変更
-        else message += ` 打者: 見送り`; // 変更
-        logMessage(message); // 変更
-        setTimeout(() => {
-            if (playerChoice === 'noswing') {
-                let isStrike = pitcherPitch.type === 'strike';
-                if (pitcherChoice == '3' && batter.ability === 'sengugan') isStrike = false;
-                recordEvent(pitcherChoice, playerChoice, isStrike ? 'strike' : 'ball');
-                logMessage(isStrike ? 'ストライク！' : 'ボール！'); // 変更
-                isStrike ? handleStrike() : handleBall();
-                return;
-            }
-            const isGoro = (pitcherChoice == '5' && playerChoice == '3') || (pitcherChoice == '3' && playerChoice == '5');
-            if (isGoro) {
-                if (gameState.runners[0] && gameState.outCount < 2) {
-                    recordEvent(pitcherChoice, playerChoice, 'double_play');
-                    logMessage('ゲッツー！'); gameState.runners[0] = false; handleOut(2); // 変更
-                } else {
-                    recordEvent(pitcherChoice, playerChoice, 'goro_out');
-                    logMessage('ゴロアウト！'); handleOut(1); // 変更
-                }
-                return;
-            }
-            if (pitcherChoice === playerChoice) {
-                let bases = 1;
-                const isChance = gameState.runners[1] || gameState.runners[2];
-                if (batter.ability === 'chance' && isChance && playerChoice === batter.chanceTarget) bases = 2;
-                else if (playerChoice == '5') bases = 2;
-                else if (playerChoice == '3') bases = 4;
-                recordEvent(pitcherChoice, playerChoice, `hit_${bases}`);
-                handleHit(bases);
-                return;
-            }
-            const foulA = ['1', '2'], foulB = ['3', '4'];
-            let isFoul = (batter.ability === 'nebari' && gameState.strikeCount === 2 && [...foulA, ...foulB].includes(pitcherChoice) && [...foulA, ...foulB].includes(playerChoice)) ||
-                         (foulA.includes(pitcherChoice) && foulA.includes(playerChoice)) || (foulB.includes(pitcherChoice) && foulB.includes(playerChoice));
-            if (isFoul) {
-                recordEvent(pitcherChoice, playerChoice, 'foul');
-                handleFoul();
-                return;
-            }
-            recordEvent(pitcherChoice, playerChoice, 'strike');
-            logMessage('空振り！'); // 変更
-            handleStrike();
-        }, 1200);
-    }
-    //----------------------------------------
-    // ゲームフロー制御
-    //----------------------------------------
-    function startTurn() {
-        const isComputerTurn = gameState.gameMode.startsWith('pvc') && ((gameState.isTop && gameState.cpuTeamIndex === 1) || (!gameState.isTop && gameState.cpuTeamIndex === 0));
-
-        if (isComputerTurn) {
-            toggleControls(true);
-            setButtonsDisabled(true);
-            const thinkingMessage = gameState.gameMode === 'pvc_rl' ? "AIが投球を考えています..." : "CPUが投球を考えています...";
-            showMessage(thinkingMessage);
-            const delay = 1500 + Math.random() * 1000;
-            if (gameState.gameMode === 'pvc_rl') setTimeout(cpuPitchAI, delay);
-            else setTimeout(classicCpuPitchAI, delay);
-        } else {
-            showMessage(`${gameState.teams[(gameState.currentAttackerIndex + 1) % 2].name}、投球を選択してください。`);
-            setButtonsDisabled(false);
-            toggleControls(true);
-        }
-        updateDisplay();
-    }
-    function selectPitch(pitch) {
-        gameState.currentPitcherChoice = pitch;
-        const isComputerTurn = gameState.gameMode.startsWith('pvc') && ((gameState.isTop && gameState.cpuTeamIndex === 0) || (!gameState.isTop && gameState.cpuTeamIndex === 1));
-
-        if (isComputerTurn) {
-            toggleControls(false);
-            setButtonsDisabled(true);
-            const thinkingMessage = gameState.gameMode === 'pvc_rl' ? "AIが打撃を考えています..." : "CPUが打撃を考えています...";
-            showMessage(thinkingMessage);
-            const delay = 1500 + Math.random() * 1000;
-            if (gameState.gameMode === 'pvc_rl') setTimeout(cpuBatAI, delay);
-            else setTimeout(classicCpuBatAI, delay);
-        } else {
-            showMessage(`${gameState.teams[gameState.currentAttackerIndex].name}、打撃を選択してください。`);
-            toggleControls(false);
-            setButtonsDisabled(false);
-        }
-    }
-    function selectBatterAction(action, pitch = null) {
-        setButtonsDisabled(true);
-        pitchAndSwing(gameState.currentPitcherChoice, action === 'swing' ? pitch : 'noswing');
-    }
-    
-    //----------------------------------------
-    // RL AI ロジック (API Call)
-    //----------------------------------------
-    async function callAIApi() {
-        const batter = getCurrentBatter();
-        const statePayload = {
-            inning: gameState.inning, totalInnings: gameState.totalInnings,
-            isTop: gameState.isTop, outCount: gameState.outCount,
-            strikeCount: gameState.strikeCount, ballCount: gameState.ballCount,
-            runners: gameState.runners, scores: [gameState.teams[0].score, gameState.teams[1].score],
-            currentAttackerIndex: gameState.currentAttackerIndex,
-            batterAbility: batter.ability, chanceTarget: batter.chanceTarget
-        };
-        try {
-            const response = await fetch('/get-ai-move', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(statePayload)
-            });
-            if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
-            const data = await response.json();
-            return data.move;
-        } catch (error) {
-            console.error("Failed to get AI move:", error);
-            return Math.floor(Math.random() * 6); // Fallback
-        }
-    }
-    async function cpuPitchAI() {
-        const action = await callAIApi();
-        const pitchChoice = (action % 5) + 1;
-        console.log(`AI Pitcher chose action ${action}, resulting in pitch ${pitchChoice}`);
-        selectPitch(String(pitchChoice));
-    }
-    async function cpuBatAI() {
-        const action = await callAIApi();
-        if (action === 5) {
-            console.log(`AI Batter chose action ${action}, resulting in NO SWING`);
-            selectBatterAction('noswing');
-        } else {
-            const swingChoice = (action % 5) + 1;
-            console.log(`AI Batter chose action ${action}, resulting in SWING at ${swingChoice}`);
-            selectBatterAction('swing', String(swingChoice));
-        }
-    }
-
-    //----------------------------------------
-    // Classic CPU ロジック
-    //----------------------------------------
-    function getWeightedRandom(choices) {
-        const totalWeight = choices.reduce((sum, choice) => sum + choice.weight, 0);
-        let random = Math.random() * totalWeight;
-        for (const choice of choices) {
-            if (random < choice.weight) return choice.value;
-            random -= choice.weight;
-        }
-        return choices[choices.length - 1].value;
-    }
-    function classicCpuPitchAI() {
-        let tendencyData = getTendencyData('batter', { matchOutCount: true, matchRunners: true });
-        if (tendencyData.total === 0) tendencyData = getTendencyData('batter', { matchOutCount: false, matchRunners: false });
-        let pitchChoices = Object.keys(PITCHES).map(id => ({ value: id, weight: 10 }));
-        if (tendencyData.total > 0) {
-            let maxSwingCount = 0, preferredSwing = null;
-            for (const [swingId, count] of Object.entries(tendencyData.counts)) {
-                if (swingId !== '0' && count > maxSwingCount) {
-                    maxSwingCount = count; preferredSwing = swingId;
-                }
-            }
-            if (preferredSwing) {
-                const targetChoice = pitchChoices.find(c => c.value === preferredSwing);
-                if (targetChoice) targetChoice.weight = 2;
-            }
-        }
-        selectPitch(getWeightedRandom(pitchChoices));
-    }
-    function classicCpuBatAI() {
-        if (Math.random() < 0.25) { selectBatterAction('noswing'); return; }
-        let tendencyData = getTendencyData('pitcher', { matchOutCount: true, matchRunners: true });
-        if (tendencyData.total === 0) tendencyData = getTendencyData('pitcher', { matchOutCount: false, matchRunners: false });
-        let swingChoices = Object.keys(PITCHES).map(id => ({ value: id, weight: 1 }));
-        if (tendencyData.total > 0) {
-            swingChoices = Object.keys(PITCHES).map(id => ({ value: id, weight: (tendencyData.counts[id] || 0) + 1 }));
-        }
-        selectBatterAction('swing', getWeightedRandom(swingChoices));
-    }
-
-    //----------------------------------------
-    // データ分析機能
-    //----------------------------------------
-    function getTendencyData(type, conditions) {
-        const batterTeamName = gameState.teams[gameState.currentAttackerIndex].name;
-        const pitcherTeamName = gameState.teams[(gameState.currentAttackerIndex + 1) % 2].name;
-        const computerName = gameState.gameMode === 'pvc_rl' ? 'AI' : 'CPU';
-
-        const isCpuPitching = gameState.gameMode.startsWith('pvc') && (gameState.currentAttackerIndex + 1) % 2 === gameState.cpuTeamIndex;
-        const isCpuBatting = gameState.gameMode.startsWith('pvc') && gameState.currentAttackerIndex === gameState.cpuTeamIndex;
-
-        const targetPitcherName = isCpuPitching ? computerName : pitcherTeamName;
-        const targetBatterName = isCpuBatting ? computerName : batterTeamName;
-
-        const runners = gameState.runners.map(r => r ? 1 : 0).join(',');
-
-        const logs = gameLog.filter(log => {
-            const teamToAnalyze = (type === 'pitcher') ? targetPitcherName : targetBatterName;
-            const teamMatch = (type === 'pitcher') ? (log.pitcherTeamName === teamToAnalyze) : (log.batterTeamName === teamToAnalyze);
-            if (!teamMatch) return false;
-            if (conditions.matchOutCount && log.outCount !== gameState.outCount) return false;
-            if (conditions.matchRunners && log.runners !== runners) return false;
-            if (conditions.matchAbilityId !== undefined && log.batterAbilityId !== conditions.matchAbilityId) return false;
-            return true;
-        });
-
-        const counts = logs.reduce((acc, log) => {
-            let countKey = (type === 'pitcher') ? log.pitchId : log.swingId;
-            if (type === 'batter' && log.batterAbilityId === 3 && log.swingId == log.chanceTargetId) countKey = `chance_${log.swingId}`;
-            acc[countKey] = (acc[countKey] || 0) + 1;
-            return acc;
-        }, {});
-        return { counts, total: logs.length };
-    }
-
-    function showAnalytics() {
-        const isPitcherTurn = pitcherControlsEl.style.display === 'block';
-        const type = isPitcherTurn ? 'batter' : 'pitcher';
-        const computerName = gameState.gameMode === 'pvc_rl' ? 'AI' : 'CPU';
-        
-        const opponentIsCpu = (isPitcherTurn && gameState.currentAttackerIndex === gameState.cpuTeamIndex) || (!isPitcherTurn && (gameState.currentAttackerIndex + 1) % 2 === gameState.cpuTeamIndex);
-        const opponentTeamName = opponentIsCpu ? computerName : (isPitcherTurn ? gameState.teams[gameState.currentAttackerIndex].name : gameState.teams[(gameState.currentAttackerIndex + 1) % 2].name);
-        
-        const currentBatter = getCurrentBatter();
-        const currentAbilityId = ABILITIES[currentBatter.ability];
-        const currentAbilityName = ABILITY_NAMES[currentAbilityId];
-
-        modalTitle.textContent = isPitcherTurn ? `【${opponentTeamName}】の打撃傾向` : `【${opponentTeamName}】の投球傾向`;
-        
-        let modalHtml = "<h3>現在の状況と完全一致</h3>" + analyzeTendency(type, { matchOutCount: true, matchRunners: true }) +
-                        "<h3>ランナー状況のみ一致</h3>" + analyzeTendency(type, { matchOutCount: false, matchRunners: true }) +
-                        "<h3>アウトカウントのみ一致</h3>" + analyzeTendency(type, { matchOutCount: true, matchRunners: false }) +
-                        "<h3>全体の傾向</h3>" + analyzeTendency(type, { matchOutCount: false, matchRunners: false });
-
-        if (currentAbilityId !== ABILITIES.none) {
-            const analysisTitle = isPitcherTurn ? `vs 特能「${currentAbilityName}」持ち打者` : `自特能「${currentAbilityName}」の場合`;
-            modalHtml += `<h3>${analysisTitle}の傾向</h3>` + analyzeTendency(type, { matchOutCount: false, matchRunners: false, matchAbilityId: currentAbilityId });
-        }
-        modalBody.innerHTML = modalHtml;
-        analyticsModal.style.display = 'flex';
-    }
-    
-    function analyzeTendency(type, conditions) {
-        const { counts, total } = getTendencyData(type, conditions);
-        if (total === 0) return '<p>該当データなし</p>';
-        let html = '<ul>';
-        Object.entries(counts).sort(([, a], [, b]) => b - a).forEach(([k, count]) => {
-            let name;
-            if (type === 'pitcher') {
-                name = PITCH_NAMES[k];
-            } else { 
-                if (String(k).startsWith('chance_')) {
-                    const pitchId = k.split('_')[1];
-                    name = `${PITCH_NAMES[pitchId]}狙い (チャンス○)`;
-                } else {
-                    name = (k == '0') ? '見送り' : `${PITCH_NAMES[k]}狙い`;
-                }
-            }
-            html += `<li><strong>${name}</strong>: ${((count / total) * 100).toFixed(1)}% (${count}/${total}回)</li>`;
-        });
-        return html + '</ul>';
-    }
-
-    //----------------------------------------
-    // 全データ表示機能
-    //----------------------------------------
-    function showAllData() {
-        if (gameLog.length === 0) {
-            dataLogBody.innerHTML = '<p>記録されたデータがありません。</p>';
-            dataLogModal.style.display = 'flex';
-            return;
-        }
-        let tableHtml = '<table id="data-log-table"><thead><tr>' +
-            '<th>投手</th><th>打者</th><th>特能</th><th>スコア</th><th>アウト</th>' +
-            '<th>カウント</th><th>走者</th><th>投球</th><th>打撃</th><th>結果</th>' +
-            '</tr></thead><tbody>';
-        
-        [...gameLog].reverse().forEach(log => {
-            let abilityStr = ABILITY_NAMES[log.batterAbilityId];
-            if (log.batterAbilityId === 3 && log.chanceTargetId) abilityStr += `(${PITCH_NAMES[log.chanceTargetId]})`;
-            tableHtml += `<tr>
-                <td>${log.pitcherTeamName}</td> <td>${log.batterTeamName}</td>
-                <td>${abilityStr}</td> <td>${log.pitcherScore} - ${log.batterScore}</td>
-                <td>${log.outCount}</td> <td>S:${log.strikeCount} B:${log.ballCount}</td>
-                <td>${log.runners.replace(/1/g, '●').replace(/0/g, '-')}</td>
-                <td>${PITCH_NAMES[log.pitchId]}</td> <td>${PITCH_NAMES[log.swingId]}</td>
-                <td>${RESULT_NAMES[log.resultId]}</td>
-            </tr>`;
-        });
-        tableHtml += '</tbody></table>';
-        dataLogBody.innerHTML = tableHtml;
-        dataLogModal.style.display = 'flex';
-    }
-    
-    //----------------------------------------
-    // データ入出力機能
-    //----------------------------------------
-    function exportData() {
-        if (gameLog.length === 0) { alert('エクスポートするデータがありません。'); return; }
-        const dataStr = JSON.stringify(gameLog, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = `airceball_log_${new Date().toISOString().slice(0,10)}.json`;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        alert(`${gameLog.length}件のデータをエクスポートしました。`);
-    }
-    function importData(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const importedData = JSON.parse(e.target.result);
-                if (!Array.isArray(importedData)) throw new Error('データ形式が正しくありません。');
-                const choice = prompt(`インポートモードを選択してください:\n1: 既存のデータに追加する\n2: 既存のデータを置き換える`, '1');
-                if (choice === '1') {
-                    gameLog = gameLog.concat(importedData);
-                    alert(`${importedData.length}件のデータを追加しました。合計: ${gameLog.length}件`);
-                } else if (choice === '2') {
-                    gameLog = importedData;
-                    alert(`${importedData.length}件のデータに置き換えました。`);
-                } else {
-                    alert('インポートをキャンセルしました。');
-                    return;
-                }
-                saveLog();
-            } catch (error) {
-                alert('ファイルの読み込みに失敗しました。有効なJSONデータではありません。\n' + error.message);
-            } finally {
-                event.target.value = '';
-            }
-        };
-        reader.readAsText(file);
-    }
-    
-    //----------------------------------------
-    // セットアップと初期化
-    //----------------------------------------
-    function createPlayerSetupHTML(teamIndex) {
-        let html = '';
-        const defaultNames = teamIndex === 1 ? ['選手A', '選手B', '選手C'] : ['選手X', '選手Y', '選手Z'];
-        for (let i = 0; i < 3; i++) {
-            html += `<div class="player-setup">
-                    ${i+1}番: <input type="text" id="t${teamIndex}-p${i}-name" value="${defaultNames[i]}" size="8">
-                    特能: <select id="t${teamIndex}-p${i}-ability" data-team="${teamIndex}" data-player="${i}">
-                            <option value="none">なし</option> <option value="sengugan">選球眼</option>
-                            <option value="nebari">粘り</option> <option value="chance">チャンス○</option>
-                         </select>
-                    <span id="t${teamIndex}-p${i}-chance-options" style="display:none;">
-                        狙い: <select id="t${teamIndex}-p${i}-chance-target">
-                            <option value="2">スライダー</option> <option value="4">フォーク</option>
-                        </select>
-                    </span></div>`;
-        }
-        return html;
-    }
-    function initSetup() {
-        document.getElementById('team1-players').innerHTML = createPlayerSetupHTML(1);
-        document.getElementById('team2-players').innerHTML = createPlayerSetupHTML(2);
-        document.querySelectorAll('select[id$="-ability"]').forEach(select => {
-            select.addEventListener('change', (e) => {
-                const team = e.target.dataset.team, player = e.target.dataset.player;
-                document.getElementById(`t${team}-p${player}-chance-options`).style.display = e.target.value === 'chance' ? 'inline' : 'none';
-            });
-        });
-        gameModeSelect.addEventListener('change', (e) => {
-            cpuSetupEl.style.display = e.target.value.startsWith('pvc') ? 'block' : 'none';
-        });
-        loadLog();
-    }
-    function startGame() {
-        gameState.totalInnings = parseInt(document.getElementById('inning-select').value, 10);
-        gameState.gameMode = gameModeSelect.value;
-        if (gameState.gameMode.startsWith('pvc')) {
-            gameState.cpuTeamIndex = parseInt(playerTeamChoiceSelect.value) === 0 ? 1 : 0;
-            const cpuTeamNameInput = document.getElementById(`team${gameState.cpuTeamIndex + 1}-name`);
-            const suffix = gameState.gameMode === 'pvc_rl' ? ' [AI]' : ' [CPU]';
-            if (!cpuTeamNameInput.value.includes('[AI]') && !cpuTeamNameInput.value.includes('[CPU]')) {
-                cpuTeamNameInput.value += suffix;
-            }
-        } else {
-            gameState.cpuTeamIndex = null;
-        }
-
-        gameState.teams[0].name = document.getElementById('team1-name').value;
-        gameState.teams[1].name = document.getElementById('team2-name').value;
-        if(gameState.teams[0].name.trim() === gameState.teams[1].name.trim()) {
-            alert("警告: チーム名が同じです。データ分析が正しく機能しない可能性があります。");
-        }
-        for (let t = 1; t <= 2; t++) {
-            gameState.teams[t-1].players = [];
-            for (let p = 0; p < 3; p++) {
-                gameState.teams[t-1].players.push({
-                    name: document.getElementById(`t${t}-p${p}-name`).value,
-                    ability: document.getElementById(`t${t}-p${p}-ability`).value,
-                    chanceTarget: document.getElementById(`t${t}-p${p}-chance-target`).value
-                });
-            }
-        }
-        gameState.gameStarted = true;
-        mainTitleEl.textContent = `${gameState.teams[0].name} vs ${gameState.teams[1].name}`;
-        setupScreenEl.style.display = 'none';
-        gameScreenEl.style.display = 'block';
-        logMessage('*** ゲーム開始！ ***'); // 変更
-        startTurn();
-    }
-    // イベントリスナー
-    document.getElementById('start-game-btn').addEventListener('click', startGame);
-    analyticsBtn.addEventListener('click', showAnalytics);
-    document.querySelectorAll('.pitch-btn').forEach(b => b.addEventListener('click', () => selectPitch(b.dataset.pitch)));
-    document.querySelectorAll('.swing-btn').forEach(b => b.addEventListener('click', () => selectBatterAction('swing', b.dataset.pitch)));
-    document.getElementById('no-swing-btn').addEventListener('click', () => selectBatterAction('noswing'));
-    document.getElementById('show-all-data-btn').addEventListener('click', showAllData);
-    document.getElementById('reset-data-btn').addEventListener('click', () => {
-        if (confirm('本当に全プレイデータを削除しますか？\nこの操作は元に戻せません。')) {
-            localStorage.removeItem(LOG_STORAGE_KEY);
-            gameLog = [];
-            alert('全データをリセットしました。');
-        }
-    });
-    document.getElementById('export-data-btn').addEventListener('click', exportData);
-    document.getElementById('import-data-btn').addEventListener('click', () => document.getElementById('import-file-input').click());
-    document.getElementById('import-file-input').addEventListener('change', importData);
-
-    [analyticsModal, dataLogModal].forEach(modal => {
-        modal.querySelector('.modal-close-btn').addEventListener('click', () => modal.style.display = 'none');
-        modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
-    });
-    // ゲーム初期化
-    initSetup();
-</script>
-
-</body>
-
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-655QVJR4CE"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-655QVJR4CE');
 </script>
 
+</body>
 </html>

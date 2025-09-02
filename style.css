@@ -1,0 +1,337 @@
+html, body { height: 100%; margin: 0; overflow: hidden; }
+body { font-family: 'Helvetica Neue', 'Arial', sans-serif; background-color: #f0f4f8; color: #333; display: flex; justify-content: center; align-items: flex-start; }
+.container { width: 100%; max-width: 1200px; height: 100%; background-color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+h2 { color: #1a3a6b; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.3em; margin-top: 10px; }
+#game-view-container { display: flex; flex-direction: column; height: 100dvh; width: 100%; }
+.game-header { flex-shrink: 0; background-color: #1a3a6b; color: white; padding: 8px 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
+.game-main { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; overflow-y: auto; position: relative; min-height: 0; }
+.game-footer { flex-shrink: 0; background-color: #f9f9f9; border-top: 1px solid #ddd; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+.scoreboard { display: flex; justify-content: space-between; align-items: center; font-size: 1.1em; margin-bottom: 8px; }
+.scoreboard-team { display: flex; align-items: center; gap: 8px; }
+.team-name { font-size: 0.9em; color: #c0c0c0; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.team-score { font-size: 1.6em; font-weight: bold; }
+.scoreboard-inning { text-align: center; }
+.scoreboard-inning span:first-child { font-size: 0.7em; color: #c0c0c0; display: block; line-height: 1; }
+.inning-text { font-size: 1.2em; }
+.bso-counts { display: flex; justify-content: flex-end; gap: 15px; background-color: transparent; padding: 0; margin: 0; }
+.bso-item { display: flex; align-items: center; gap: 5px; }
+.bso-item span:first-child { font-size: 0.8em; color: #c0c0c0; }
+.bso-item span:last-child { font-size: 1.4em; font-weight: bold; color: #ffc107;}
+.log-container { display: none; }
+.log-toggle-btn { position: absolute; top: 10px; left: 10px; background-color: rgba(0,0,0,0.4); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.9em; z-index: 5; width: auto; cursor: pointer; }
+.log-toggle-btn:hover { background-color: rgba(0,0,0,0.6); }
+
+.game-exit-btn { position: absolute; top: 10px; right: 10px; background-color: #dc143c; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.9em; z-index: 5; width: auto; cursor: pointer; }
+.game-exit-btn:hover { background-color: #cc1237; }
+
+.rules-container { display: none; }
+.rules-toggle-btn { position: absolute; top: 50px; left: 10px; background-color: rgba(0,0,0,0.4); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.9em; z-index: 5; width: auto; cursor: pointer; }
+.rules-toggle-btn:hover { background-color: rgba(0,0,0,0.6); }
+
+/* ルール説明全体のコンテナ */
+.rule-container {
+  font-family: sans-serif;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 各ルールのセクション */
+.rule-item {
+  border-bottom: 1px solid #ddd;
+}
+.rule-item:last-child {
+  border-bottom: none;
+}
+
+/* 見出し部分（クリックする部分） */
+.rule-item summary {
+  font-size: 1.1em;
+  font-weight: bold;
+  padding: 16px;
+  cursor: pointer;
+  position: relative;
+  background-color: #f9f9f9;
+  list-style: none; /* デフォルトの三角マークを消す */
+  transition: background-color 0.2s;
+}
+
+.rule-item summary:hover {
+  background-color: #f0f0f0;
+}
+
+/* 見出しの前に開閉アイコンを追加 */
+.rule-item summary::before {
+  content: '+';
+  position: absolute;
+  right: 20px;
+  font-size: 1.4em;
+  color: #888;
+  transition: transform 0.3s;
+}
+
+/* 開いた状態の見出しのスタイル */
+.rule-item[open] > summary {
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+}
+
+/* 開いた状態のアイコンを回転させる */
+.rule-item[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+/* 詳細内容のスタイル */
+.rule-content {
+  padding: 20px;
+  background-color: #fff;
+  line-height: 1.6;
+}
+
+.rule-content h4,
+.rule-content h5 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.rule-content p {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.rule-content ul {
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+
+.rule-content .notice {
+  font-size: 0.9em;
+  color: #777;
+  background-color: #f7f7f7;
+  border-left: 3px solid #ccc;
+  padding: 10px;
+  margin-top: 15px;
+}
+
+/* 表のスタイル */
+.rule-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+}
+
+.rule-content th,
+.rule-content td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.rule-content th {
+  background-color: #f2f2f2;
+}
+
+/* 強調文字 */
+.rule-content strong {
+  color: #d9534f; /* 強調したい色に変更してください */
+  font-weight: bold;
+}
+
+.rule-content hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 20px 0;
+}
+
+
+.field-wrapper { width: 180px; height: 180px; margin: 0 auto 15px auto; }
+.field { position: relative; width: 100%; height: 100%; }
+.base { position: absolute; width: 25px; height: 25px; background-color: #e0e0e0; border: 2px solid #aaa; }
+#home { bottom: 0; left: 50%; transform: translateX(-50%); }
+#first { top: 50%; right: 0; transform: translateY(-50%); }
+#second { top: 0; left: 50%; transform: translateX(-50%); }
+#third { top: 50%; left: 0; transform: translateY(-50%); }
+.runner { background-color: #ffc107 !important; }
+#batter-info { background-color: #e3f2fd; border: 1px solid #90caf9; padding: 8px 12px; margin: 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; text-align: left; flex-wrap: wrap; gap: 10px; }
+.batter-name { font-size: 1.2em; font-weight: bold; color: #1a3a6b; }
+.batter-details { font-size: 0.8em; color: #555; }
+.ability-label { display: block; font-size: 0.7em; color: #888; }
+.ability-name { font-size: 1em; font-weight: bold; color: #1a3a6b; }
+#result { font-weight: bold; color: #1a3a6b; min-height: 40px; margin-bottom: 10px; background-color: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; display: flex; justify-content: center; align-items: center; width: 100%; max-width: 400px; padding: 15px; box-sizing: border-box; font-size: clamp(1em, 4vw, 1.5em); }
+.controls { background-color: transparent; padding: 0; margin: 0; }
+.controls h2 { display: none; }
+.controls-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+button { background-color: #2a64b5; color: white; border: none; padding: 10px 5px; margin: 0; border-radius: 5px; cursor: pointer; font-size: 0.9em; transition: background-color 0.3s ease; width: 100%; }
+#no-swing-btn { grid-column: 1 / -1; }
+/* マウスカーソルによるホバーが可能なデバイスのみ、以下のスタイルを適用 */
+@media (hover: hover) {
+    button:hover:not(:disabled) { 
+        background-color: #1a3a6b; 
+    }
+}
+}
+button:disabled { background-color: #ccc; cursor: not-allowed; }
+.no-swing { background-color: #6c757d; }
+.no-swing:hover:not(:disabled) { background-color: #5a6268; }
+#analytics-btn { background-color: #ff9800; }
+#analytics-btn:hover:not(:disabled) { background-color: #f57c00; }
+
+#start-game-btn { font-size: 1.2em; padding: 15px 30px; }
+.data-controls { margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
+#reset-data-btn, #export-data-btn, #import-data-btn, #show-all-data-btn { font-size: 0.9em; padding: 10px 15px; margin: 5px; }
+#reset-data-btn { background-color: #d32f2f; }
+#export-data-btn { background-color: #4caf50; }
+#import-data-btn { background-color: #03a9f4; }
+#show-all-data-btn { background-color: #607d8b; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background-color: #fff; padding: 20px 30px; border-radius: 8px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; position: relative; text-align: left; }
+.modal-close-btn { position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; color: #888; cursor: pointer; }
+#data-log-table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+#data-log-table th, #data-log-table td { border: 1px solid #ddd; padding: 6px; text-align: center; }
+#ingame-log-body { font-size: 0.9em; background-color: #fff; border: 1px solid #e0e0e0; border-radius: 4px; padding: 8px; }
+#ingame-log-body p { margin: 0 0 5px 0; padding-bottom: 5px; border-bottom: 1px dashed #eee; }
+#ingame-log-body p:last-child { border-bottom: none; margin-bottom: 0; }
+@media (min-width: 1000px) {
+    .container { max-width: 1200px; padding: 25px; height: auto; }
+    #game-view-container { display: grid; grid-template-columns: 300px 1fr 300px; grid-template-areas: "left center right"; gap: 25px; align-items: flex-start; height: auto; }
+    .game-header { grid-area: left; display: block; position: relative; padding: 0; background-color: transparent; color: #333; box-shadow: none; }
+    .game-main { grid-area: center; padding: 0; }
+    .game-footer { grid-area: center; position: relative; margin-top: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 8px; box-shadow: none; }
+    #analytics-btn { width: auto; margin: 5px; }
+    .log-container { grid-area: right; display: block; border: 1px solid #ddd; border-radius: 8px; padding: 10px 15px; background-color: #f9f9f9; }
+    #log-box { height: 550px; }
+    .log-toggle-btn { display: none; }
+    .scoreboard { display: grid; grid-template-columns: 1fr auto 1fr; background-color: #1a3a6b; color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 1.2em; }
+    .scoreboard-team { display: block; text-align: center; }
+    .bso-counts { display: flex; justify-content: space-around; background-color: #f1f1f1; padding: 10px; border-radius: 8px; margin-bottom: 20px; }
+    .bso-item { flex-direction: column; }
+    .bso-item span:first-child { color: #888; } .bso-item span:last-child { color: #1a3a6b; }
+    #batter-info { margin-bottom: 20px; padding: 12px 15px; }
+    .controls h2 { display: block; color: #1a3a6b; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.3em; margin-top: 0; }
+    .controls-grid { display: block; }
+    button { margin: 5px; padding: 12px 20px; font-size: 1em; }
+    #no-swing-btn { width: auto; }
+}
+/* --- Setup Screen Redesign --- */
+#setup-screen {
+    padding: 10px;
+    height: 100%;
+    overflow-y: auto;
+    background-color: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+.setup-container {
+    width: 100%;
+    max-width: 500px;
+}
+.setup-title {
+    text-align: center;
+    color: #1a3a6b;
+    margin-bottom: 20px;
+}
+.setup-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+.setup-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+.setup-item {
+    display: flex;
+    flex-direction: column;
+}
+.setup-item label {
+    font-size: 0.8em;
+    color: #555;
+    margin-bottom: 5px;
+}
+select, input[type="text"] {
+    width: 80%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 0;
+    font-size: 0.9em;
+	color: black;
+}
+.tab-container {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+}
+.tab-link {
+    padding: 10px 15px;
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+    font-size: 1em;
+    color: #555;
+    border-bottom: 3px solid transparent;
+	border-radius: 0;
+    margin-bottom: -1px;
+}
+.tab-link.active {
+    color: #555;
+    border-bottom-color: #2a64b5;
+    font-weight: bold;
+}
+.tab-content {
+    padding-top: 20px;
+}
+.team-name-input {
+    margin-bottom: 15px;
+}
+.team-name-input label {
+    font-size: 0.9em;
+    margin-right: 10px;
+    font-weight: bold;
+    color: #333;
+}
+.player-setup {
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr;
+    gap: 8px 12px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.player-setup:last-child {
+    border-bottom: none;
+}
+#start-game-btn {
+    width: 100%;
+    font-size: 1.2em;
+    padding: 15px 30px;
+    background-color: #2a64b5;
+    margin-bottom: 20px;
+}
+.data-controls {
+    padding: 15px;
+    text-align: center;
+}
+.data-controls-title {
+    font-size: 1em;
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+}
+.data-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+}
+.data-controls button {
+    font-size: 0.9em;
+    padding: 10px 5px;
+}
+#reset-data-btn { background-color: #d32f2f; }
+#export-data-btn { background-color: #4caf50; }
+#import-data-btn { background-color: #03a9f4; }
+#show-all-data-btn { background-color: #607d8b; }
