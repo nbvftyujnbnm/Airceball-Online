@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rules - Airceball Online</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="header-container"></div>
+<header class="main-header">
+    <div class="header-content">
+        <h1 class="main-title-header">Airceball Online</h1>
+        <button id="hamburger-btn" class="hamburger-btn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</header>
+
+<nav id="nav-menu" class="nav-menu">
+    <ul>
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="game.html">ゲーム開始</a></li>
+        <li><a href="rules.html" class="located">ルール</a></li>
+        <li><a href="version.html">バージョン情報</a></li>
+    </ul>
+</nav>
+
+<div class="container static-page-container">
+    <div class="setup-card">
+        <h2 class="setup-title">ルール</h2>
+        <div class="rule-container">
+
+          <details class="rule-item" open>
+            <summary>打撃の基本ルール（塁打）</summary>
+            <div class="rule-content">
+              <p>ピッチャーが投げた球を打つと、球種に応じて以下の結果になります。</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>打った球種</th>
+                    <th>結果</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ストレート、スライダー、フォーク</td>
+                    <td><strong>一塁打</strong></td>
+                  </tr>
+                  <tr>
+                    <td>チェンジアップ</td>
+                    <td><strong>二塁打</strong></td>
+                  </tr>
+                  <tr>
+                    <td>カーブ</td>
+                    <td><strong>本塁打</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="notice">※特殊能力「チャンス○」が発動している場合、ルールが変わることがあります。</p>
+            </div>
+          </details>
+        
+          <details class="rule-item">
+            <summary>特殊な結果（ファールとゴロ）</summary>
+            <div class="rule-content">
+              <h4>ファール（打ち直し）</h4>
+              <p>特定の球種の組み合わせで打った場合、「ファール」となり打ち直しになります。</p>
+              <table>
+                <thead>
+                  <tr>
+                    <th>投球</th>
+                    <th>打席で選択した球種</th>
+                    <th>結果</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ストレート</td>
+                    <td>スライダー</td>
+                    <td rowspan="2">ファール</td>
+                  </tr>
+                  <tr>
+                    <td>カーブ</td>
+                    <td>フォーク</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="notice">※特殊能力「粘り」が発動している場合、ルールが変わることがあります。</p>
+              <hr>
+              <h4>ゴロ（アウト）</h4>
+              <p>特定の組み合わせで打つと「ゴロ」となり、アウトになります。</p>
+              <ul>
+                <li><strong>状況</strong>: 「チェンジアップを投げてカーブを打つ」または「カーブを投げてチェンジアップを打つ」</li>
+                <li><strong>結果</strong>:
+                  <ul>
+                    <li>ランナーなし → <strong>1アウト</strong></li>
+                    <li>一塁にランナーあり → <strong>ダブルプレー（2アウト）</strong></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </details>
+        
+          <details class="rule-item">
+            <summary>特殊能力（特能）について</summary>
+            <div class="rule-content">
+              <p>選手が持つ特殊能力によって、基本ルールが有利に変わります。</p>
+              
+              <h5><strong>選球眼</strong></h5>
+              <p>ピッチャーが投げた「カーブ」がボール球扱いになり、見送ることができます。</p>
+              
+              <h5><strong>粘り</strong></h5>
+              <p>カウントが2ストライクに追い込まれると発動します。ストレート、スライダー、カーブ、フォークのどの組み合わせで打っても「ファール」にでき、三振しにくくなります。</p>
+              
+              <h5><strong>チャンス○</strong></h5>
+              <p>ランナーが得点圏（二塁または三塁）にいるチャンスの場面で発動します。事前に「スライダー」か「フォーク」のどちらかを指定し、その球を打つと結果が<strong>二塁打</strong>にグレードアップします。</p>
+            </div>
+          </details>
+        
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -200,8 +200,13 @@ function toggleControls(showPitcher) {
     batterControlsEl.style.display = showPitcher ? 'none' : 'block';
 }
 function setButtonsDisabled(disabled) {
-    document.querySelectorAll('#game-screen button').forEach(btn => { btn.disabled = disabled; });
+    // 終了ボタン(exit-button)や分析ボタン(analytics-btn)などを除外する
+    const query = '#game-screen button:not(#exit-button):not(#log-toggle-button):not(#rules-toggle-button)'; // 他にも除外したいボタンがあれば:not()を追加
+    document.querySelectorAll(query).forEach(btn => {
+        btn.disabled = disabled;
+    });
 }
+
    function updateDisplay() {
     document.getElementById('team1-score').textContent = gameState.teams[0].score;
     document.getElementById('team2-score').textContent = gameState.teams[1].score;
@@ -296,6 +301,8 @@ function endGame() {
     logMessage(`*** ${message} ***`);
     setButtonsDisabled(true);
     analyticsBtn.disabled = false;
+    // ★追加：ゲーム終了後はページ遷移の確認を不要にする
+    gameState.gameStarted = false;
 }
 function handleOut(count = 1) {
     gameState.outCount += count;
@@ -489,14 +496,6 @@ function handleHit(bases) {
         if (gameState.atBatLog.length > 3) {
             gameState.atBatLog.shift();
         }
-
-        // ★★★ 修正点 ★★★
-        // エラーの原因となっていた以下のブロックを完全に削除
-        /*
-        if (!isGoro && pitcherChoice !== playerChoice && playerChoice !== 'noswing') {
-             setTimeout(startTurn, 1500);
-        }
-        */
 
     }, 1200);
 }
@@ -794,9 +793,10 @@ function analyzeTendency(type, conditions) {
 }
 
 //----------------------------------------
-// 全データ表示機能
+// 全データ表示機能（このファイルでは使われないが、他で参照される可能性を考慮し残す）
 //----------------------------------------
 function showAllData() {
+    if (!dataLogBody || !dataLogModal) return;
     if (gameLog.length === 0) {
         dataLogBody.innerHTML = '<p>記録されたデータがありません。</p>';
         dataLogModal.style.display = 'flex';
@@ -825,7 +825,7 @@ function showAllData() {
 }
 
 //----------------------------------------
-// データ入出力機能
+// データ入出力機能（このファイルでは使われないが、他で参照される可能性を考慮し残す）
 //----------------------------------------
 function exportData() {
     if (gameLog.length === 0) { alert('エクスポートするデータがありません。'); return; }
@@ -991,38 +991,50 @@ function startGame() {
     gameState.gameStarted = true;
     setupScreenEl.style.display = 'none';
     gameScreenEl.style.display = 'block';
+
+    // メインヘッダーを非表示にする
+    const mainHeader = document.querySelector('.main-header');
+    if (mainHeader) {
+        mainHeader.style.display = 'none';
+    }
+
+    updateDisplay(); // undateDisplayのタイポを修正
     logMessage('*** ゲーム開始！ ***');
-    startTurn();
+    startTurn(); // ゲームの最初のターンを開始
 }
+
 // ----------------------------------------
 // 初期化とイベントリスナー
 // ----------------------------------------
+
+
 function showIngameLog() {
     const modal = document.getElementById('ingame-log-modal');
     if (modal) modal.style.display = 'flex';
 }
 
-function showRules() {
+function showRulesModal() {
     const modal = document.getElementById('rules-modal');
     if (modal) modal.style.display = 'flex';
 }
+
+// beforeUnload を beforeunload に修正
+window.addEventListener('beforeunload',(event) => {
+	if(gameState.gameStarted){
+		event.preventDefault();
+		event.returnValue = '';
+	}
+});
+
+console.log('added beforeunload event');
 
 document.getElementById('start-game-btn').addEventListener('click', startGame);
 analyticsBtn.addEventListener('click', showAnalytics);
 document.querySelectorAll('.pitch-btn').forEach(b => b.addEventListener('click', () => selectPitch(b.dataset.pitch)));
 document.querySelectorAll('.swing-btn').forEach(b => b.addEventListener('click', () => selectBatterAction('swing', b.dataset.pitch)));
 document.getElementById('no-swing-btn').addEventListener('click', () => selectBatterAction('noswing'));
-document.getElementById('show-all-data-btn').addEventListener('click', showAllData);
-document.getElementById('reset-data-btn').addEventListener('click', () => {
-    if (confirm('本当に全プレイデータを削除しますか？\nこの操作は元に戻せません。')) {
-        localStorage.removeItem(LOG_STORAGE_KEY);
-        gameLog = [];
-        alert('全データをリセットしました。');
-    }
-});
-document.getElementById('export-data-btn').addEventListener('click', exportData);
-document.getElementById('import-data-btn').addEventListener('click', () => document.getElementById('import-file-input').click());
-document.getElementById('import-file-input').addEventListener('change', importData);
+
+// データ管理関連のイベントリスナーはホーム画面に移動したため削除
 
 document.querySelectorAll('.modal-overlay').forEach(modal => {
     modal.querySelector('.modal-close-btn').addEventListener('click', () => modal.style.display = 'none');
@@ -1045,16 +1057,69 @@ function openTab(evt, tabName) {
     evt.currentTarget.className += " active";
 }
 
+// ★修正：終了ボタンの処理を変更
 exitButton.addEventListener('click', () => {
-    const result = window.confirm('ゲームを終了して設定画面に戻りますか？');
+    const result = window.confirm('ゲームを終了してホーム画面に戻りますか？');
     if (result) {
-        window.location.reload(); 
+        // gameStartedフラグをfalseにして、beforeunloadイベントが発火しないようにする
+        gameState.gameStarted = false;
+        window.location.href = 'index.html'; // ホーム画面へ遷移
     }
 });
 
+//DOMロード後に実行
 document.addEventListener('DOMContentLoaded', function() {
-    const firstTab = document.querySelector('.tab-link');
-    if (firstTab) {
-        firstTab.click();
-    }
+	console.log('DOM loaded');
+
+    // 外部ファイル(header.html)を fetch API を使って読み込む
+    fetch('header.html')
+        .then(response => {
+            // レスポンスが正常かチェック
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            // HTMLテキストとして解決
+            return response.text();
+        })
+        .then(data => {
+            // id="header-container" の要素に読み込んだHTMLを挿入
+            document.getElementById('header-container').innerHTML = data;
+
+            // --- ここから、ヘッダーが挿入された後に実行したい処理 ---
+
+            // 1. ハンバーガーメニューのクリックイベントを設定
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const navMenu = document.getElementById('nav-menu');
+            if (hamburgerBtn && navMenu) {
+                hamburgerBtn.addEventListener('click', function() {
+                    // ボタンとメニューに 'active' クラスを付け外しする
+                    this.classList.toggle('active');
+                    navMenu.classList.toggle('active');
+                });
+            }
+
+            // 2. 現在のページに応じて 'located' クラスを付与
+            const currentPage = window.location.pathname.split('/').pop();
+            const navLinks = navMenu.querySelectorAll('ul li a');
+
+            navLinks.forEach(link => {
+                const linkPage = link.getAttribute('href').split('/').pop();
+
+                if (linkPage === currentPage || (currentPage === '' && linkPage === 'index.html')) {
+                    link.classList.add('located');
+                }
+            });
+
+            // ★★★ 修正ポイント ★★★
+            // 元からあった処理を、fetchが完了したこのブロック内に移動する
+            const firstTab = document.querySelector('.tab-link');
+            if (firstTab) {
+                firstTab.click();
+            }
+        })
+        .catch(error => {
+            // エラーが発生した場合の処理
+            console.error('ヘッダーの読み込みに失敗しました:', error);
+            document.getElementById('header-container').innerHTML = '<p>ヘッダーを読み込めません</p>';
+        });
 });
