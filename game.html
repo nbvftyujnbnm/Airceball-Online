@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airceball Online</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="header-container"></div>
+<div class="container">
+    <div id="setup-screen">
+        <div class="setup-container">
+            <h2 class="setup-title">ゲーム設定</h2>
+
+            <div class="setup-card">
+                <div class="setup-grid">
+                    <div class="setup-item">
+                        <label for="game-mode">ゲームモード</label>
+                        <select id="game-mode">
+                            <option value="pvp" selected>Player vs Player</option>
+                            <option value="pvc_classic">Player vs Classic CPU</option>
+                            <option value="pvc_rl">Player vs AI</option>
+                            <option value="cvc_rl">AI vs AI</option> </select>
+                    </div>
+                    <div class="setup-item">
+                        <label for="inning-select">イニング数</label>
+                        <select id="inning-select">
+                            <option value="1" selected>1イニング</option>
+                            <option value="3">3イニング</option>
+                            <option value="5">5イニング</option>
+                            <option value="9">9イニング</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="cpu-setup" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                    <label for="player-team-choice">あなたが操作するチーム</label>
+                    <select id="player-team-choice">
+                        <option value="0">先攻チーム</option>
+                        <option value="1">後攻チーム</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setup-card">
+                <div class="tab-container">
+                    <button class="tab-link" onclick="openTab(event, 'team1-setup')">先攻チーム</button>
+                    <button class="tab-link" onclick="openTab(event, 'team2-setup')">後攻チーム</button>
+                </div>
+
+                <div id="team1-setup" class="tab-content" style="display: block;">
+                    <div class="team-name-input">
+                        <label for="team1-name">チーム名</label>
+                       <input type="text" id="team1-name" value="" list="team-suggestions">
+                    </div>
+                    <div id="team1-players"></div>
+                </div>
+                <div id="team2-setup" class="tab-content">
+                    <div class="team-name-input">
+                        <label for="team2-name">チーム名</label>
+                        <input type="text" id="team2-name" value="" list="team-suggestions">
+                    </div>
+                    <div id="team2-players"></div>
+                </div>
+            </div>
+            
+            <button id="start-game-btn">ゲーム開始</button>
+
+        </div>
+		<datalist id="team-suggestions"></datalist>
+    </div>
+
+    <div id="game-screen" style="display: none;">
+        <div id="game-view-container">
+            <header class="game-header">
+                <div class="scoreboard">
+                    <div class="scoreboard-team">
+                        <span class="team-score" id="team1-score">0</span>
+                        <span class="team-name" id="team1-display-name">TEAM 1</span>
+                    </div>
+                    <div class="scoreboard-inning">
+                        <span>INNING</span>
+                        <span id="inning" class="inning-text">1回表</span>
+                    </div>
+                    <div class="scoreboard-team">
+                         <span class="team-name" id="team2-display-name">TEAM 2</span>
+                        <span class="team-score" id="team2-score">0</span>
+                    </div>
+                </div>
+                <div class="bso-counts">
+                    <div class="bso-item"><span>B</span><span id="ball-count">0</span></div>
+                    <div class="bso-item"><span>S</span><span id="strike-count">0</span></div>
+                    <div class="bso-item"><span>O</span><span id="out-count">0</span></div>
+                </div>
+            </header>
+            
+            <main class="game-main">
+                <button class="log-toggle-btn" id='log-toggle-button' onclick="showIngameLog()">ログ</button>
+                <button class="rules-toggle-btn" id="rules-toggle-button"  onclick="showRulesModal()">ルール</button>
+                <button class="game-exit-btn" id="exit-button">終了</button>
+
+                <div class="field-wrapper">
+                    <div class="field">
+                        <div class="base" id="home"></div>
+                        <div class="base" id="first"></div>
+                        <div class="base" id="second"></div>
+                        <div class="base" id="third"></div>
+                    </div>
+                </div>
+                <div id="result">ゲーム開始！</div>
+            </main>
+
+            <footer class="game-footer">
+                <div id="batter-info"></div>
+                <div id="pitcher-controls" class="controls">
+                    <h2>投球選択</h2>
+                    <div class="controls-grid">
+                        <button class="pitch-btn" data-pitch="1">ストレート</button>
+                        <button class="pitch-btn" data-pitch="2">スライダー</button>
+                        <button class="pitch-btn" data-pitch="3">カーブ</button>
+                        <button class="pitch-btn" data-pitch="4">フォーク</button>
+                        <button class="pitch-btn" data-pitch="5">チェンジアップ</button>
+                    </div>
+                </div>
+                <div id="batter-controls" class="controls" style="display:none;">
+                    <h2>打撃選択</h2>
+                    <div class="controls-grid">
+                        <button class="swing-btn" data-pitch="1">ストレート</button>
+                        <button class="swing-btn" data-pitch="2">スライダー</button>
+                        <button class="swing-btn" data-pitch="3">カーブ</button>
+                        <button class="swing-btn" data-pitch="4">フォーク</button>
+                        <button class="swing-btn" data-pitch="5">チェンジアップ</button>
+                        <button id="no-swing-btn" class="no-swing">見送る</button>
+                    </div>
+                </div>
+                <button id="analytics-btn">傾向分析</button> 
+            </footer>
+
+            <div class="log-container">
+                <div id="log-box"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="analytics-modal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="modal-close-btn">&times;</span>
+        <h2 id="modal-title">傾向分析</h2>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+<div id="data-log-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 90vw;">
+        <span class="modal-close-btn">&times;</span>
+        <h2>全プレイデータログ</h2>
+        <div id="data-log-body" style="max-height: 70vh; overflow-y: auto;"></div>
+    </div>
+</div>
+
+<div id="ingame-log-modal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="modal-close-btn">&times;</span>
+        <h2>プレイログ</h2>
+        <div id="ingame-log-body" style="max-height: 70vh; overflow-y: auto;"></div>
+    </div>
+</div>
+
+<div id="rules-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 700px;">
+        <span class="modal-close-btn">&times;</span>
+        <h2 class="setup-title">ルール</h2>
+        <div class="rule-container" style="max-height: 70vh; overflow-y: auto; padding: 10px;">
+            <details class="rule-item" open>
+                <summary>打撃の基本ルール（塁打）</summary>
+                <div class="rule-content">
+                    <p>ピッチャーが投げた球を打つと、球種に応じて以下の結果になります。</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>打った球種</th>
+                                <th>結果</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ストレート、スライダー、フォーク</td>
+                                <td><strong>一塁打</strong></td>
+                            </tr>
+                            <tr>
+                                <td>チェンジアップ</td>
+                                <td><strong>二塁打</strong></td>
+                            </tr>
+                            <tr>
+                                <td>カーブ</td>
+                                <td><strong>本塁打</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="notice">※特殊能力「チャンス○」が発動している場合、ルールが変わることがあります。</p>
+                </div>
+            </details>
+        
+            <details class="rule-item">
+                <summary>特殊な結果（ファールとゴロ）</summary>
+                <div class="rule-content">
+                    <h4>ファール（打ち直し）</h4>
+                    <p>特定の球種の組み合わせで打った場合、「ファール」となり打ち直しになります。</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>投球</th>
+                                <th>打席で選択した球種</th>
+                                <th>結果</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ストレート</td>
+                                <td>スライダー</td>
+                                <td rowspan="2">ファール</td>
+                            </tr>
+                            <tr>
+                                <td>カーブ</td>
+                                <td>フォーク</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="notice">※特殊能力「粘り」が発動している場合、ルールが変わることがあります。</p>
+                    <hr>
+                    <h4>ゴロ（アウト）</h4>
+                    <p>特定の組み合わせで打つと「ゴロ」となり、アウトになります。</p>
+                    <ul>
+                        <li><strong>状況</strong>: 「チェンジアップを投げてカーブを打つ」または「カーブを投げてチェンジアップを打つ」</li>
+                        <li><strong>結果</strong>:
+                            <ul>
+                                <li>ランナーなし → <strong>1アウト</strong></li>
+                                <li>一塁にランナーあり → <strong>ダブルプレー（2アウト）</strong></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </details>
+        
+            <details class="rule-item">
+                <summary>特殊能力（特能）について</summary>
+                <div class="rule-content">
+                    <p>選手が持つ特殊能力によって、基本ルールが有利に変わります。</p>
+                    
+                    <h5><strong>選球眼</strong></h5>
+                    <p>ピッチャーが投げた「カーブ」がボール球扱いになり、見送ることができます。</p>
+                    
+                    <h5><strong>粘り</strong></h5>
+                    <p>カウントが2ストライクに追い込まれると発動します。ストレート、スライダー、カーブ、フォークのどの組み合わせで打っても「ファール」にでき、三振しにくくなります。</p>
+                    
+                    <h5><strong>チャンス○</strong></h5>
+                    <p>ランナーが得点圏（二塁または三塁）にいるチャンスの場面で発動します。事前に「スライダー」か「フォーク」のどちらかを指定し、その球を打つと結果が<strong>二塁打</strong>にグレードアップします。</p>
+                </div>
+            </details>
+        </div>
+    </div>
+</div>
+
+<script src="header.js"></script>
+<script src="script.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-655QVJR4CE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-655QVJR4CE');
+</script>
+</body>
+</html>

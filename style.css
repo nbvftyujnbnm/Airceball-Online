@@ -1,6 +1,208 @@
-html, body { height: 100%; margin: 0; overflow: hidden; }
-body { font-family: 'Helvetica Neue', 'Arial', sans-serif; background-color: #f0f4f8; color: #333; display: flex; justify-content: center; align-items: flex-start; }
-.container { width: 100%; max-width: 1200px; height: 100%; background-color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+/* --- 既存のスタイル ... --- */
+
+/* html, body の overflow 指定を修正 */
+html, body { height: 100%; margin: 0; }
+body { font-family: 'Helvetica Neue', 'Arial', sans-serif; background-color: #f0f4f8; color: #333; display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; padding:0,0,10;}
+
+/* メニュー表示中に背景のスクロールを禁止するスタイルを追加 */
+body.menu-open {
+    overflow: hidden;
+}
+
+
+/* --- Header & Navigation --- */
+.main-header {
+    width: 100%;
+    background-color: #1a3a6b;
+    color: white;
+    padding: 0 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1001; /* ナビゲーションメニューより手前に */
+    position: sticky;
+    top: 0;
+    box-sizing: border-box;
+}
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 50px;
+}
+.main-title-header {
+    font-size: 1.2em;
+    margin: 0;
+}
+.main-title-header a{
+	color: white;
+	text-decoration: none;
+}
+.hamburger-btn {
+    width: 30px;
+    height: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+.hamburger-btn span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: white;
+    border-radius: 3px;
+    transition: all 0.3s ease-in-out;
+}
+.hamburger-btn.active span:nth-child(1) {
+    transform: translateY(11px) rotate(45deg);
+}
+.hamburger-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+.hamburger-btn.active span:nth-child(3) {
+    transform: translateY(-11px) rotate(-45deg);
+}
+.nav-menu {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 50px);
+    background-color: rgba(26, 58, 107, 0.98);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+}
+.nav-menu.active {
+    transform: translateX(0);
+}
+.nav-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+.nav-menu li {
+    margin: 25px 0;
+}
+.nav-menu a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.5em;
+    font-weight: bold;
+    padding: 10px 20px;
+    transition: color 0.2s;
+}
+.nav-menu a.located {
+	color: #555;
+}
+/* --- Container Adjustments --- */
+.container { 
+    width: 100%; 
+    max-width: 1200px; 
+    height: 100%; 
+    background-color: #f0f4f8; /* 背景色を変更 */
+    box-shadow: none; /* シャドウを削除 */
+    display: flex; 
+    flex-direction: column; 
+    padding: 0;
+    margin: 0 auto;
+}
+
+/* --- Home Screen --- */
+.home-container {
+    justify-content: center;
+    align-items: center;
+    /* 変更点: 上下のpaddingを調整 */
+    padding: 70px 20px 40px;
+    box-sizing: border-box;
+	gap:10px;
+}
+
+.home-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.home-btn {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    background-color: #2a64b5;
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1.2em;
+    transition: background-color 0.3s;
+}
+.home-btn:hover {
+    background-color: #1a3a6b;
+}
+.home-btn.alt {
+    background-color: #6c757d;
+}
+.home-btn.alt:hover {
+    background-color: #5a6268;
+}
+
+/* --- Static Pages (Rules, Version) --- */
+.static-page-container {
+    padding: 15px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    height: calc(100vh - 50px);
+}
+.static-page-container .setup-card {
+    max-width: 700px;
+    margin: 0 auto;
+}
+.version-info {
+    line-height: 1.7;
+}
+.version-info hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid #eee;
+}
+.version-info ul {
+    padding-left: 20px;
+}
+
+/* --- Game Screen Adjustments --- */
+#game-view-container { 
+    height: calc(100vh - 50px);
+}
+.rules-toggle-btn {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- 既存のスタイル ... --- */
+/* bodyの重複定義を整理 */
+/* body { font-family: 'Helvetica Neue', 'Arial', sans-serif; background-color: #f0f4f8; color: #333; display: flex; justify-content: center; align-items: flex-start; } */
+/* ... 中略 ... */
+#setup-screen {
+    padding: 10px;
+    height: calc(100vh - 50px); /* ヘッダー分を引く */
+    overflow-y: auto;
+    background-color: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+/* ... 以下、既存のスタイル */
+
+/* .containerの重複定義を整理 */
+/* .container { width: 100%; max-width: 1200px; height: 100%; background-color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; } */
 h2 { color: #1a3a6b; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.3em; margin-top: 10px; }
 #game-view-container { display: flex; flex-direction: column; height: 100dvh; width: 100%; }
 .game-header { flex-shrink: 0; background-color: #1a3a6b; color: white; padding: 8px 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10; }
@@ -170,7 +372,7 @@ button { background-color: #2a64b5; color: white; border: none; padding: 10px 5p
         background-color: #1a3a6b; 
     }
 }
-}
+
 button:disabled { background-color: #ccc; cursor: not-allowed; }
 .no-swing { background-color: #6c757d; }
 .no-swing:hover:not(:disabled) { background-color: #5a6268; }
@@ -178,7 +380,12 @@ button:disabled { background-color: #ccc; cursor: not-allowed; }
 #analytics-btn:hover:not(:disabled) { background-color: #f57c00; }
 
 #start-game-btn { font-size: 1.2em; padding: 15px 30px; }
-.data-controls { margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
+.data-controls { border-top: 1px solid #eee; padding-top: 20px;  margin-bottom: 20px;}
+.data-btn {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
 #reset-data-btn, #export-data-btn, #import-data-btn, #show-all-data-btn { font-size: 0.9em; padding: 10px 15px; margin: 5px; }
 #reset-data-btn { background-color: #d32f2f; }
 #export-data-btn { background-color: #4caf50; }
@@ -232,12 +439,21 @@ button:disabled { background-color: #ccc; cursor: not-allowed; }
     color: #1a3a6b;
     margin-bottom: 20px;
 }
+/*【重要】これが全ページのカードの基本スタイルになります */
 .setup-card {
     background-color: #fff;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+/* ホーム画面のカードのみ幅を調整 */
+.home-container .setup-card {
+	box-sizing: border-box;
+    max-width: 500px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
 }
 .setup-grid {
     display: grid;
