@@ -944,7 +944,7 @@ function startGame() {
         return; // ゲーム開始を中止
     }
     if(team1NameInput.value.trim() === team2NameInput.value.trim()) {
-        alert("警告: チーム名が同じです。データ分析が正しく機能しない可能性があります。");
+        alert("チーム名は異なるものを設定してください");
         return;
     }
 
@@ -1018,13 +1018,13 @@ function showRulesModal() {
     if (modal) modal.style.display = 'flex';
 }
 
-// beforeUnload を beforeunload に修正
 window.addEventListener('beforeunload',(event) => {
-	if(gameState.gameStarted){
-		event.preventDefault();
-		event.returnValue = '';
-	}
+    if(gameState.gameStarted){
+        event.preventDefault();
+        event.returnValue = '';
+    }
 });
+
 
 console.log('added beforeunload event');
 
@@ -1069,57 +1069,8 @@ exitButton.addEventListener('click', () => {
 
 //DOMロード後に実行
 document.addEventListener('DOMContentLoaded', function() {
-	console.log('DOM loaded');
-
-    // 外部ファイル(header.html)を fetch API を使って読み込む
-    fetch('header.html')
-        .then(response => {
-            // レスポンスが正常かチェック
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            // HTMLテキストとして解決
-            return response.text();
-        })
-        .then(data => {
-            // id="header-container" の要素に読み込んだHTMLを挿入
-            document.getElementById('header-container').innerHTML = data;
-
-            // --- ここから、ヘッダーが挿入された後に実行したい処理 ---
-
-            // 1. ハンバーガーメニューのクリックイベントを設定
-            const hamburgerBtn = document.getElementById('hamburger-btn');
-            const navMenu = document.getElementById('nav-menu');
-            if (hamburgerBtn && navMenu) {
-                hamburgerBtn.addEventListener('click', function() {
-                    // ボタンとメニューに 'active' クラスを付け外しする
-                    this.classList.toggle('active');
-                    navMenu.classList.toggle('active');
-                });
-            }
-
-            // 2. 現在のページに応じて 'located' クラスを付与
-            const currentPage = window.location.pathname.split('/').pop();
-            const navLinks = navMenu.querySelectorAll('ul li a');
-
-            navLinks.forEach(link => {
-                const linkPage = link.getAttribute('href').split('/').pop();
-
-                if (linkPage === currentPage || (currentPage === '' && linkPage === 'index.html')) {
-                    link.classList.add('located');
-                }
-            });
-
-            // ★★★ 修正ポイント ★★★
-            // 元からあった処理を、fetchが完了したこのブロック内に移動する
-            const firstTab = document.querySelector('.tab-link');
-            if (firstTab) {
-                firstTab.click();
-            }
-        })
-        .catch(error => {
-            // エラーが発生した場合の処理
-            console.error('ヘッダーの読み込みに失敗しました:', error);
-            document.getElementById('header-container').innerHTML = '<p>ヘッダーを読み込めません</p>';
-        });
+    const firstTab = document.querySelector('.tab-link');
+    if (firstTab) {
+        firstTab.click();
+    }
 });

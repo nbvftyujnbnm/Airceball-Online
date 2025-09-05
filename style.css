@@ -10,8 +10,6 @@ body.menu-open {
 }
 
 
-/* --- 追記・変更ここから --- */
-
 /* --- Header & Navigation --- */
 .main-header {
     width: 100%;
@@ -35,6 +33,10 @@ body.menu-open {
 .main-title-header {
     font-size: 1.2em;
     margin: 0;
+}
+.main-title-header a{
+	color: white;
+	text-decoration: none;
 }
 .hamburger-btn {
     width: 30px;
@@ -98,10 +100,7 @@ body.menu-open {
     padding: 10px 20px;
     transition: color 0.2s;
 }
-.nav-menu a:hover {
-    color: #ffc107;
-}
-.nav-menu .located {
+.nav-menu a.located {
 	color: #555;
 }
 /* --- Container Adjustments --- */
@@ -381,7 +380,7 @@ button:disabled { background-color: #ccc; cursor: not-allowed; }
 #analytics-btn:hover:not(:disabled) { background-color: #f57c00; }
 
 #start-game-btn { font-size: 1.2em; padding: 15px 30px; }
-.data-controls { border-top: 1px solid #eee; padding-top: 20px; }
+.data-controls { border-top: 1px solid #eee; padding-top: 20px;  margin-bottom: 20px;}
 .data-btn {
 	white-space: nowrap;
 	overflow: hidden;
